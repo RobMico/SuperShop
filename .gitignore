@@ -1,0 +1,11 @@
+server/node_modules
+client/node_modules
+server/static/advert/*
+server/static/brands/*
+server/static/types/*
+server/utils/logs/*
+server/.dev.env
+server/.tests.env
+server/.production.env
+server/.swp
+client/.env

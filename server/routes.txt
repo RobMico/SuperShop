@@ -1,0 +1,13 @@
+POST /api/brand/    ROLE:ADMIN  'Create brand'  Body:{name}
+GET /api/brand/ ROLE:NULL   'Get all brands' Params:{}
+
+POST /api/user/register ROLE:NULL   'Register new user' Body:{email, password}
+POST /api/user/login    ROLE:NULL   'Get token an exist user' Body:{email, password}
+GET /api/user/auth  ROLE:USER+   'Check token' Headers:{authorization}
+
+POST /api/type/ ROLE:ADMIN   'Create type' Body:{name}
+GET /api/type/ ROLE:NULL   'Get all types' Params:{}
+
+POST /api/device/ ROLE:ADMIN   'Create device' Body:{name, price, bandId, typeId, img, info:[{title, description}]}
+GET /api/device/ ROLE:NULL   'Get all devices' Params:{brandId, typeId, limit, page}
+GET /api/device/:id ROLE:NULL   'Get one device' Params:{}

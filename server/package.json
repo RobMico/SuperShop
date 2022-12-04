@@ -1,0 +1,37 @@
+{
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-fileupload": "^1.4.0",
+    "express-winston": "^4.2.0",
+    "form-data": "^4.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "jwt-decode": "^3.1.2",
+    "multer": "^1.4.5-lts.1",
+    "node-html-parser": "^6.1.1",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "redis": "^4.3.1",
+    "request": "^2.88.2",
+    "sequelize": "^6.21.2",
+    "uuid": "^8.3.2",
+    "winston": "^3.8.1"
+  },
+  "name": "shop",
+  "version": "1.0.0",
+  "description": "-",
+  "main": "main.js",
+  "scripts": {
+    "dev": "NODE_ENV=dev nodemon main.js",
+    "debug": "NODE_ENV=dev node main.js --inspect",
+    "tests": "NODE_ENV=tests nodemon main.js",
+    "production": "NODE_ENV=production nodemon main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.18"
+  }
+}
