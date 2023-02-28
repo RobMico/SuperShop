@@ -1,0 +1,7 @@
+node_modules
+static/advert/*
+static/brands/*
+static/types/*
+!static/types/default.jpg
+!static/brands/default.jpg
+!static/advert/default.jpg

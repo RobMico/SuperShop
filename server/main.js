@@ -1,8 +1,8 @@
 require('dotenv').config({path:'.'+process.env.NODE_ENV+'.env'});
+console.log('dot env conf');
 const express = require('express');
 const PORT = process.env.PORT || 5000;
 const app = express();
-const sequelize = require('./db')
 const redis = require('./redisClient');
 
 
@@ -19,6 +19,11 @@ process.env.static = path.resolve(__dirname, 'static');
 
 const redisFiller = require('./utils/redisFiller');
 
+const wait = (time)=>{
+    return new Promise((res, rej)=>{
+        return setTimeout(res, time);
+    });
+}
 
 
 app.use(function (req, res, next) {    
@@ -46,16 +51,13 @@ app.use(ErrorMiddleware);
 
 const start = async ()=>{
     try{
+        await wait(10000);
+        const sequelize = require('./db');
         await sequelize.authenticate();
         await sequelize.sync();
-        dataLoger.info("Postgress:Connected")
+        dataLoger.info("Postgress:Connected");
         await redis.connect();
-        dataLoger.info("Redis:Connected")
-        // await redisFiller.recreateRedisStorage({
-        //     "1":['one_HI', 'one_HELLO'],
-        //     "2":['2_Hello'],
-        //     "3":['two_102', 'two_BBBB', 'three_e']
-        // });
+        dataLoger.info("Redis:Connected");
         const server = app.listen(PORT, ()=>{logger.debug(`Listening on ${PORT}`);});
     }catch(ex){
         logger.error("Can not start appclication", ex)        
