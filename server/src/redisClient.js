@@ -4,8 +4,8 @@ const dataLogger = require('./utils/dataLogger');
 const redisClient = {
   client:redis.createClient({
     socket: {
-      host: 'redis',
-      port: 6379
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT
     }
   }),
   connect: async function (){

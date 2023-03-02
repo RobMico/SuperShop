@@ -1,9 +1,11 @@
 {
   "dependencies": {
+    "@types/express": "^4.17.17",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "express-async-errors": "^3.1.1",
     "express-fileupload": "^1.4.0",
     "express-winston": "^4.2.0",
     "form-data": "^4.0.0",
@@ -16,6 +18,7 @@
     "redis": "^4.3.1",
     "request": "^2.88.2",
     "sequelize": "^6.21.2",
+    "ts-node": "^10.9.1",
     "uuid": "^8.3.2",
     "winston": "^3.8.1"
   },
@@ -24,15 +27,16 @@
   "description": "-",
   "main": "main.js",
   "scripts": {
-    "dev": "NODE_ENV=dev nodemon main.js",
-    "debug": "NODE_ENV=dev node main.js --inspect",
-    "start_dev": "NODE_ENV=dev node main.js",
-    "tests": "NODE_ENV=tests nodemon main.js",
-    "production": "NODE_ENV=production nodemon main.js"
+    "start:debug": "NODE_ENV=dev node main.js --inspect",
+    "start:dev": "NODE_ENV=dev nodemon main.ts",
+    "start:tests": "NODE_ENV=tests nodemon main.js",
+    "start:production": "NODE_ENV=production nodemon main.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^2.0.18"
+    "@types/node": "^18.14.2",
+    "nodemon": "^2.0.18",
+    "typescript": "^4.9.5"
   }
 }
