@@ -45,3 +45,5 @@ start();
 
 //DB_URI=postgresql://localhost:5432/shop?user=shop_adm&password=shop_adm
 //CONNECT=psql -U shop_adm -d shop
+
+//SELECT CONCAT('DROP TABLE ',table_name,' CASCADE;') FROM information_schema.tables WHERE table_schema = 'public';

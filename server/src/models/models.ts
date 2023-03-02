@@ -207,9 +207,6 @@ Basket.belongsTo(Device, { as: 'device' });
 User.hasMany(Rating, { as: 'rating' });
 Rating.belongsTo(User);
 
-Device.hasMany(DeviceInfo);
-DeviceInfo.belongsTo(Device);
-
 Type.hasMany(Device);
 Device.belongsTo(Type);
 
@@ -222,11 +219,17 @@ Rating.belongsTo(Device);
 Device.hasMany(DeviceInfo, { as: 'info' });
 DeviceInfo.belongsTo(Device);
 
+Type.hasMany(CommonTypeInfo, { as: 'properties' });
+CommonTypeInfo.belongsTo(Type);
+
+
+
+
+
 Type.belongsToMany(Brand, { through: TypeBrand });
 Brand.belongsToMany(Type, { through: TypeBrand });
 
-Type.hasMany(CommonTypeInfo, { as: 'properties' });
-CommonTypeInfo.belongsTo(Type);
+
 
 export {
     Comment,
