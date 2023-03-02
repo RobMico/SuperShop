@@ -1,5 +1,5 @@
 import { DataTypes, Op } from 'sequelize';
-import { Column, HasMany, Table, Model } from 'sequelize-typescript';
+import { Column, HasMany, Table, Model, DataType } from 'sequelize-typescript';
 import BasketRepository from './BasketModel';
 import CommentsRepository from './CommentsModel';
 import RatingRepository from './RatingModel';
@@ -15,7 +15,7 @@ interface UserCreationAttributes {
 @Table({ tableName: 'users' })
 class UserRepository extends Model<UserRepository, UserCreationAttributes> {
     @Column({
-        type: DataTypes.STRING, unique: true,
+        type: DataType.STRING, unique: true,
         validate: {
             isEmail: {
                 msg: 'Invalid email address'
@@ -24,11 +24,11 @@ class UserRepository extends Model<UserRepository, UserCreationAttributes> {
     })
     email: string;
 
-    @Column({ type: DataTypes.STRING })
+    @Column({ type: DataType.STRING })
     password: string;
 
     @Column({
-        type: DataTypes.STRING, defaultValue: 'USER', validate: {
+        type: DataType.STRING, defaultValue: 'USER', validate: {
             len: {
                 args: [3, 10],
                 msg: 'Role must contain between 3 and 10 characters.'
@@ -41,7 +41,7 @@ class UserRepository extends Model<UserRepository, UserCreationAttributes> {
     role: string;
 
     @Column({
-        type: DataTypes.STRING, validate: {
+        type: DataType.STRING, validate: {
             len: { args: [3, 30], msg: 'Role must contain between 3 and 30 characters.' }, is: {
                 args: /^([A-Za-z0-9\u00C0-\u00D6\u00D8-\u00f6\u00f8-\u00ff\s]*)$/g,
                 msg: 'Must be only letters',

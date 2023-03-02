@@ -2,10 +2,7 @@ import TokenUserData from "../dto/TokenUserDataDto";
 import UserLoginDto from "../dto/UserLoginDto";
 import UserRegistrationDto from "../dto/UserRegistrationDto";
 import ApiError from "../error/ApiError";
-
 import UserModel from "../models/UserModel";
-
-//import { User } from "../models/models";
 import Cryptor from "../utils/Crypror";
 
 
@@ -15,7 +12,7 @@ class AuthService {
         const token = await Cryptor.generateToken(user);
         return token;
     }
-    async login(userDto: UserLoginDto) {
+    async login(userDto: UserLoginDto): Promise<string> {
         const user = await UserModel.findOne({ where: { email: userDto.email } });
         if (!user) {
             throw ApiError.badRequest('User not found');

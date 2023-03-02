@@ -6,6 +6,8 @@ import RatingModel from "./RatingModel";
 interface CommentsCreationAttributes {
     comment: string;
     userName: string;
+    userId:number;
+    rateId:number;
 }
 
 

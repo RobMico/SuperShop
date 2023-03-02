@@ -8,6 +8,7 @@ interface CommonTypeInfoCreationAttributes {
     filter: boolean;
     searchByNum: boolean;
     searchProps: string;
+    brandId:number;
 }
 
 

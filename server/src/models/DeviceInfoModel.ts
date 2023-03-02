@@ -4,8 +4,9 @@ import DeviceModel from "./DeviceModel";
 
 interface DeviceInfoCreationAttributes {
     title: string;
-    numPart: number;
+    numPart?: number;
     textPart: string;
+    deviceId:number;
 }
 
 

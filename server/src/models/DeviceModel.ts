@@ -11,6 +11,8 @@ interface DeviceCreationAttributes {
     price: number;
     disabled?: boolean;
     avaliable?: boolean;
+    typeId:number;
+    brandId:number;
 }
 
 @Table({ tableName: 'device' })

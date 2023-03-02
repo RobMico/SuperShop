@@ -12,6 +12,7 @@ function ErrorHandlerWrap(target: Object, method: string, descriptor: PropertyDe
             if (ex instanceof ApiError) {
                 return res.status(ex.status).json({ message: ex.message });
             }
+            console.log(ex);
             logger.error("Unhandled error", ex);
             res.status(500).json({ message: "Unhandled error" })
         }

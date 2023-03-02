@@ -8,6 +8,8 @@ interface RatingCreationAttributes {
     rate: number;
     comment: string;
     userName: string;
+    userId:number;
+    deviceId:number;
 }
 
 

@@ -5,6 +5,8 @@ import DeviceModel from "./DeviceModel";
 
 interface BasketCreationAttributes {
     count: number;
+    userId:number;
+    deviceId:number;
 }
 
 
