@@ -31,6 +31,7 @@ class BasketController {
     }
 
     async getBasketDevices(req: AuthRequest, res: Response, next: NextFunction) {
+        //TODO: add pagination
         const user = req.user;
         const devices = await BasketService.getAllDevices(user.id);
         return res.json(devices);

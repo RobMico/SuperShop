@@ -1,16 +1,13 @@
 import express from 'express';
 const router = express.Router();
 
-import basketControler from '../controlers/basketControler';
+import basketControler from '../controlers/basketController';
 import checkRole from '../middleware/checkRoleMiddleware';
 import authMiddleware from '../middleware/authMiddleware';
 
-router.post('/add',authMiddleware, basketControler.add);
-
+router.post('/add',authMiddleware, basketControler.addToBasket);
 //router.post('/buy',authMiddleware, basketControler.buy);
-
-router.post('/remove',authMiddleware, basketControler.remove);
-
-router.get('/', authMiddleware, basketControler.getAll);
+router.post('/remove',authMiddleware, basketControler.removeFromBasket);
+router.get('/', authMiddleware, basketControler.getBasketDevices);
 
 export default router;

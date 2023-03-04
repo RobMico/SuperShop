@@ -1,13 +1,19 @@
+import { Response, NextFunction } from "express";
+import ApiError from "../error/ApiError";
+import AuthRequest from "../utils/authRequest";
+
 const { Brand, sequelize } = require('../models/models');
-const ApiError = require('../error/ApiError');
 const logger = require('../utils/logger')(module);
 const fileWorker = require('../utils/fileWorker');
 
+class BrandController{
+    fileExtentions = process.env.uploadExtentions ? process.env.uploadExtentions.split(';') : ['.jpg'];
+    async createBrand(req: AuthRequest, res: Response, next: NextFunction){
+        
+    }
 
-var brandControler = {
-    fileExtentions: process.env.uploadExtentions ? process.env.uploadExtentions.split(';') : ['.jpg'],
 
-    create: async (req, res, next) => {
+    async create (req, res, next) {
         const { name, description } = req.body;
         //const img = req.files?req.files.img:undefined;
         //let removeFile;    
@@ -46,8 +52,8 @@ var brandControler = {
             logger.error("create;", ex);
             return next(ApiError.internal('Something was wrong'));
         }
-    },
-    getAll: async (req, res, next) => {
+    }
+    async getAll(req, res, next) {
         try {
             const brands = await Brand.findAll();
             return res.json(brands);
@@ -55,9 +61,9 @@ var brandControler = {
             logger.error("getall;", ex);
             return next(ApiError.internal('Something was wrong'));
         }
-    },
+    }
 
-    getCarousel: async (req, res, next) => {
+    async getCarousel(req, res, next) {
         try {
             const brands = await Brand.findAll({ limit: 5, order: [["img", "ASC"]] });
             return res.json(brands);
@@ -65,9 +71,7 @@ var brandControler = {
             logger.error("getCarousel;", ex);
             return next(ApiError.internal('Something was wrong'));
         }
-    },
-
-
+    }
     // removeOne:async (req, res, next)=>{
     //     const {brandId} = req.body;
     //     if(!brandId)
@@ -90,7 +94,7 @@ var brandControler = {
     // },
 
 
-    edit: async (req, res, next) => {
+    async edit(req, res, next){
         const { brandId, name, description } = req.body;
         const img = req.files ? req.files.img : undefined;
 
@@ -157,4 +161,6 @@ var brandControler = {
         }
     }
 }
-module.exports = brandControler;
+
+
+export default new BrandController();
