@@ -12,7 +12,7 @@ import adminRouter from './adminRouter';
 
 router.use('/user', authRouter);
 // router.use('/type', typeRouter);
-// router.use('/brand', brandRouter);
+router.use('/brand', brandRouter);
 // router.use('/device', deviceRouter);
 router.use('/basket', basketRouter);
 // router.use('/comment', commentRouter);

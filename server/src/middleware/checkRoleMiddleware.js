@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger')(module);
 
 module.exports = function(role){ 
-    return (req, res, next)=>{        
+    return (req, res, next)=>{
+        
         try{
             const [method, token] = req.headers.authorization.split(' ');
             if(method!='Bearer'||!token)

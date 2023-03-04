@@ -13,7 +13,7 @@ export default class Validator {
         }
         throw ApiError.validationError('Validation error, incorrect email');
     }
-    static ValidateName(name: any): string {
+    static ValidateUserName(name: any): string {
         if (name && typeof name === 'string') {
             if (this.nameRegex.test(name)) {
                 return name;
@@ -38,5 +38,27 @@ export default class Validator {
         } catch {
             throw ApiError.validationError('Incorrect limit');
         }
+    }
+    static ValidateBrandTypeName(name: any): string {
+        if (name && typeof name === 'string') {
+            if (name.length >= 2 && name.length < 50) {
+                return name;
+            }
+        }
+        throw ApiError.validationError('Validation error, incorrect name');
+    }
+    static ValidateDescription(description: any, require: boolean = false): string {
+        if (!description) {
+            if (!require) {
+                return null;
+            }
+            throw ApiError.validationError('Validation error, undefined description');
+        }
+        if (typeof description === 'string') {
+            if (description.length >= 2 && description.length < 500) {
+                return description;
+            }
+        }
+        throw ApiError.validationError('Validation error, incorrect name');
     }
 }

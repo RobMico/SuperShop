@@ -6,7 +6,7 @@ export default class UserRegistrationDto {
     password: string
     constructor(body: any) {
         this.email = Validator.ValidateEmail(body.email);
-        this.name = Validator.ValidateName(body.name);
+        this.name = Validator.ValidateUserName(body.name);
         this.password = Validator.ValidatePassword(body.password);
     }
 }
