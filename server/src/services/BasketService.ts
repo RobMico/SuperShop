@@ -1,4 +1,4 @@
-import AddDeviceBasket from "../dto/AddDeviceBasket";
+import AddDeviceBasket from "../dto/Basket/AddDeviceBasket";
 import ApiError from "../error/ApiError";
 import BasketModel from "../models/BasketModel";
 import DeviceModel from "../models/DeviceModel";

@@ -1,5 +1,5 @@
-import ApiError from "../error/ApiError";
-import Validator from "../utils/Validator";
+import ApiError from "../../error/ApiError";
+import Validator from "../../utils/Validator";
 
 export default class AddDeviceBasket {
     deviceId: number;

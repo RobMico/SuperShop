@@ -6,7 +6,7 @@ const logger = require('../utils/logger')(module);
 const fs = require("fs");
 const fileWorker = require('../utils/fileWorker');
 const __staticPath = path.resolve(__dirname, '..', 'static')
-const redisFilterWorker = require('../models/redisFilterWorker');
+const redisFilterWorker = require('../utils/RedisFilterWorker');
 
 
 var deviceControler = {

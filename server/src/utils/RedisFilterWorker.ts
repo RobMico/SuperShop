@@ -1,7 +1,7 @@
 import client from '../redisClient';
 import uuid from 'uuid';
-import redisCacheControl from '../utils/redisCacheControl';
-import Logger from '../utils/logger';
+import redisCacheControl from './redisCacheControl';
+import Logger from './logger';
 const logger = Logger(module);
 import { commandOptions } from 'redis';
 //import { set } from '../db';
@@ -28,112 +28,42 @@ class FilterWorker {
         }
         return ids;
     }
-    //create bitmap for new type
+
     async addType(typeId: number) {
-        client.lPush(('type_' + typeId), []);
-        client.setBit(('typeD_' + typeId), 0, 0);
+        await client.lPush(('type_' + typeId), []);
+        await client.setBit(('typeD_' + typeId), 0, 0);
     }
-    async checkType(typeId: number) {
-        if (!this.lockTypeUpdate) {
-            this.lockTypeUpdate = true;
 
-            let tmp = await client.lRange(('type_' + typeId), 0, -1);
-            let set = new Set(tmp);
-
-            await client.del(('type_' + typeId));
-            await client.lPush(('type_' + typeId), [...set]);
-
-
-            for (const e of this.unlockTypeUpdate) {
-                await e();
-            }
-            this.unlockTypeUpdate = [];
-            this.lockTypeUpdate = false;
-            return true
+    async addFilter(typeId: number, prop: string, device_ids: number[]) {
+        await client.lRange(('type_' + typeId), 0, -1);
+        const typeProps = await client.lRange(('type_' + typeId), 0, -1);
+        if (!typeProps.includes(prop)) {
+            await client.lPush(('type_' + typeId), prop);
         }
-        else {
-            this.unlockTypeUpdate.push(async () => {
-                let tmp = await client.lRange(('type' + typeId), 0, -1)
-                let set = new Set(tmp);
-                await client.del(('type' + typeId))
-                await client.lPush(('type' + typeId), [...set])
-            })
+
+        for (const id of device_ids) {
+            await client.setBit(prop, id, 1);
+        }
+
+        if (device_ids.length == 0) {
+            await client.setBit(prop, 1, 0);
         }
     }
-    async addFilter(typeId, prop, device_ids) {
-        if (!this.lockTypeUpdate) {
-            this.lockTypeUpdate = true;
-            let _tmp = await client.lRange(('type_' + typeId), 0, -1)
 
-            if (!await client.exists(prop)) {
-                client.lPush(('type_' + typeId), prop)
-            }
-            else if (!(await client.lRange(('type_' + typeId), 0, -1)).includes(prop)) {
-                client.lPush(('type_' + typeId), prop)
-            }
-
-
-            //client
-            for (const e of device_ids) {
-                await client.setBit(prop, e, 1);
-            }
-
-            if (device_ids.length == 0) {
-                await client.setBit(prop, 1, 0)
-            }
-
-            for (const e of this.unlockTypeUpdate) {
-                await e();
-            }
-            this.unlockTypeUpdate = [];
-            this.lockTypeUpdate = false;
-            return true
-        }
-        else {
-            this.unlockTypeUpdate.push(async () => {
-                if (!await client.exists(prop)) {
-                    client.lPush(('type_' + typeId), prop)
-                }
-                else if (!(await client.lRange(('type_' + typeId), 0, -1)).includes(prop)) {
-                    client.lPush(('type_' + typeId), prop)
-                }
-                for (const e of device_ids) {
-                    client.setBit(prop, e, 1);
-                }
-                if (device_ids.length == 0) {
-                    await client.setBit(prop, 1, 0)
-                }
-            });
-        }
-    }
-    async editFilter(previous, newVal, id) {
-        previous && client.setBit(previous, id, 0);
-        newVal && client.setBit(newVal, id, 1);
+    async editFilter(previous: string, newVal: string, id: number) {
+        previous && await client.setBit(previous, id, 0);
+        newVal && await client.setBit(newVal, id, 1);
         return true;
     }
-    async addDevice(props, deviceId: number, typeId: number) {
-        let stored = await client.lRange(('type_' + typeId), 0, -1);
 
-        await client.setBit(('typeD_' + typeId), deviceId, 1);
-
-        props.forEach(e1 => {
-            let tmp = e1.title + '_' + e1.textPart
-            stored.forEach(e2 => {
-                if (tmp == e2) {
-                    client.setBit(e2, deviceId, 1)
-                }
-            })
-        });
-        return true;
-    }
     async getFilters(typeId: number) {
-        if (!typeId) {
-            throw new Error("No typeId")
-        }
+        //result should be like:
+        //title:'color_red', count:1...
+        //note that color_red can be of different types, so we have to use bitOp(AND) with type bitmap and count ids of certain type
+
 
         //If this data cached, load from cache
-        //redis get returns buffer only if it is defined in props
-        let cache = <string>await client.get(`*_type${typeId}Props`);
+        let cache = <string>await client.get(`*_type${typeId}Props`);//redis get returns buffer only if it is directly set in arguments
         if (cache) {
             try {
                 logger.info("getFilters;loading cache");
@@ -143,38 +73,75 @@ class FilterWorker {
                 logger.error("getFilters;Loading cache error", ex);
             }
         }
-        let stored = <string[]>await client.lRange(('type_' + typeId), 0, -1);
+
+
+        let stored = <string[]>await client.lRange(('type_' + typeId), 0, -1);//always return string[]
         let result = [];
         for (const e of stored) {
-            if (e) {
+            if (e) {//sometimes there are empty lines
                 try {
-
-                    let temp_key = "*_" + uuid.v4();
-                    await client.bitOp('AND', temp_key, [('typeD_' + typeId), e]);
-                    const count: number = await client.bitCount(temp_key);
-                    // console.log(e, 'type:', typeId)
-                    // let tmp = await client.get(commandOptions({ returnBuffers: true }), 'typeD_' + typeId)
-                    // console.log(tmp)
-                    // let ids = GetBits(tmp)
-                    // console.log(ids)      
-
-                    // tmp = await client.get(commandOptions({ returnBuffers: true }), e)
-                    // console.log(tmp)
-                    // ids = GetBits(tmp)
-                    // console.log(ids)  
-
-
-                    // tmp = await client.get(commandOptions({ returnBuffers: true }), temp_key)
-                    // console.log(tmp)
-                    // ids = GetBits(tmp)
-                    // console.log(ids)
+                    let uniqueKey = "*_" + uuid.v4();
+                    await client.bitOp('AND', uniqueKey, [('typeD_' + typeId), e]);
+                    const count: number = await client.bitCount(uniqueKey);
                     result.push({ str: e, count: count })
                 } catch { }
             }
         }
-        client.set(`*_type${typeId}Props`, JSON.stringify(result));
+        await client.set(`*_type${typeId}Props`, JSON.stringify(result));//cashing
         return result;
     }
+
+
+
+
+    
+    async addDevice(props, deviceId: number, typeId: number) {
+        let stored = await client.lRange(('type_' + typeId), 0, -1);
+        await client.setBit(('typeD_' + typeId), deviceId, 1);
+
+        props.forEach(e1 => {
+            let tmp = e1.title + '_' + e1.textPart;
+            stored.forEach(e2 => {
+                if (tmp == e2) {
+                    client.setBit(e2, deviceId, 1)
+                }
+            })
+        });
+        return true;
+    }
+
+    // async checkType(typeId: number) {
+    //     if (!this.lockTypeUpdate) {
+    //         this.lockTypeUpdate = true;
+
+    //         let tmp = await client.lRange(('type_' + typeId), 0, -1);
+    //         let set = new Set(tmp);
+
+    //         await client.del(('type_' + typeId));
+    //         await client.lPush(('type_' + typeId), [...set]);
+
+
+    //         for (const e of this.unlockTypeUpdate) {
+    //             await e();
+    //         }
+    //         this.unlockTypeUpdate = [];
+    //         this.lockTypeUpdate = false;
+    //         return true
+    //     }
+    //     else {
+    //         this.unlockTypeUpdate.push(async () => {
+    //             let tmp = await client.lRange(('type' + typeId), 0, -1)
+    //             let set = new Set(tmp);
+    //             await client.del(('type' + typeId))
+    //             await client.lPush(('type' + typeId), [...set])
+    //         })
+    //     }
+    // }
+
+
+    //create bitmap for new type
+
+
     async getIds(filters, resultKey, typeId: number) {
         if (!filters || filters.length == 0) {//exit if no filters
             return;
@@ -277,7 +244,7 @@ class FilterWorker {
             }
         }
     }
-    async getRedisTypes(){
+    async getRedisTypes() {
         let data = <string[]>await client.keys('type_*');
         let res = [];
         for (const el of data) {

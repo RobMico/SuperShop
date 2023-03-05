@@ -1,5 +1,5 @@
-import CreateBrandDto from "../dto/CreateBrandDto";
-import EditBrandDto from "../dto/EditBrandDto";
+import CreateBrandDto from "../dto/Brand/CreateBrandDto";
+import EditBrandDto from "../dto/Brand/EditBrandDto";
 import ApiError from "../error/ApiError";
 import BrandModel from "../models/BrandModel";
 import ImagesManager from "../utils/imagesManager";

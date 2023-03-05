@@ -3,7 +3,7 @@ const logger = require('../utils/logger')(module);
 const fs = require("fs");
 var path = require('path');
 const redisCacheControl = require('../utils/redisCacheControl');
-const redisFilterWorker = require('../models/redisFilterWorker');
+const redisFilterWorker = require('../utils/RedisFilterWorker');
 const { Device, DeviceInfo, Rating, Comment, sequelize, Op, Type, Brand } = require('../models/models');
 const fileWorker = require('../utils/fileWorker');
 

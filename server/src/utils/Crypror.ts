@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import TokenUserData from '../dto/TokenUserDataDto';
-import UserRegistrationDto from '../dto/UserRegistrationDto';
+import UserRegistrationDto from '../dto/Auth/UserRegistrationDto';
 import UserModel from '../models/UserModel';
 
 export default class Cryptor {

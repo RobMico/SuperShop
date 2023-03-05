@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 import AuthRequest from '../utils/authRequest';
-import AddDeviceBasket from '../dto/AddDeviceBasket';
+import AddDeviceBasket from '../dto/Basket/AddDeviceBasket';
 import TokenUserData from '../dto/TokenUserDataDto';
 import BasketService from '../services/BasketService';
 import ErrorHandlerWrap from '../middleware/errorHandlerWrap';

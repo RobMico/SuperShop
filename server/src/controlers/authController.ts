@@ -3,8 +3,8 @@ import { Request, Response, NextFunction } from 'express';
 import AuthRequest from "../utils/authRequest";
 import TokenUserData from "../dto/TokenUserDataDto";
 import AuthService from "../services/AuthService";
-import UserRegistrationDto from "../dto/UserRegistrationDto";
-import UserLoginDto from "../dto/UserLoginDto";
+import UserRegistrationDto from "../dto/Auth/UserRegistrationDto";
+import UserLoginDto from "../dto/Auth/UserLoginDto";
 import ErrorHandlerWrap from "../middleware/errorHandlerWrap";
 
 class AuthControler {

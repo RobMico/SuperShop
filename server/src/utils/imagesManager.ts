@@ -15,12 +15,12 @@ class ImagesManager {
     static maxFileSize: number = 5200000;
     result: string = '';
     private action: Function;
-    
+
     constructor(filePath: string | null = null) {
         filePath && (this.filePath = filePath);
     }
 
-    async parseFiles(files:UploadedFile[]) {
+    async saveFiles(files: UploadedFile[]) {
         //needed to run promise all
         let writeAll = [];
         //If only one image is sent, here i get an object instead of an array(a single image is not good at all)
@@ -51,9 +51,12 @@ class ImagesManager {
 
         return this.result;
     }
-    async saveFile(file:UploadedFile, name?: string) {
-        if(name)
-        {
+    async saveFile(file: UploadedFile, name?: string) {
+        if (name === 'noimage.jpg') {
+            name = null;
+        }
+
+        if (name) {
             name = name.replace('%0:', '');
         }
 
