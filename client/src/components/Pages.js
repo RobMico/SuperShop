@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import { Pagination } from "react-bootstrap";
 import { Context } from "..";
 
-const Pages = ({paginationKey})=>{
+const Pages = ()=>{
     const {devices} = useContext(Context);
     const pageCount = Math.ceil(devices.totalCount/devices.limit);
     

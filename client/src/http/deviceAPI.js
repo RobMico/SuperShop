@@ -21,6 +21,10 @@ export const fetchDevices = async (typeId, limit=40, offset = 0, filters)=>{
     if(typeId=="custom"){
         typeId = null;
     }
+    if(!filters)
+    {
+        filters={sortBy:'reviews', sortOrder:true};
+    }
     const {data} = await host.get('api/device', {
         params:{
             typeId:typeId, offset:offset, limit:limit, filters:filters

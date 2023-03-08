@@ -10,13 +10,14 @@ let load = ()=>{
 }
 load();
 
-var getFullPath = function (img) {
+var getFullPath = function (img, path) {
+    
     if(!filesHolders)
     {
         load();
     }
     filesHolders.forEach((element, i) => {
-        img = img.replace('%'+i+':', element);
+        img = img.replace('%'+i+':', path?(element+path):element);
     });
     //return 'https://files.foxtrot.com.ua/PhotoNew/img_0_60_8610_0_1_637877047973579105.jpg'
     //        https://files.foxtrot.com.ua/PhotoNewimg_0_142_5637_0_1_637769094106910221.jpg

@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { Col, Container, Row, Image, Card, Button } from "react-bootstrap"
 import { fetchProps } from "../../http/typeAPI";
+import getFullPath from "../../utils/FullFilePath";
 import TypePropRow from "./TypePropRow";
 
 var myMap = function (obj, callback) {
@@ -42,7 +43,6 @@ let TypeRow = ({ type, typeBuffer, showEditModal, showAddPropModal, addPropBuffe
         setShowProps(!showProps)        
         if(Object.keys(_props).length==0) {
             let data = await fetchProps(type.id)
-            console.log(data)
             let tmp = data.map(e => { 
                 let _tmp =e.str.split('_')
                 return {
@@ -52,7 +52,6 @@ let TypeRow = ({ type, typeBuffer, showEditModal, showAddPropModal, addPropBuffe
                 }
             })
             _setProps(groupBy(tmp, 'title'))
-            console.log(groupBy(tmp, 'title'))
         }
     }
 
@@ -68,7 +67,7 @@ let TypeRow = ({ type, typeBuffer, showEditModal, showAddPropModal, addPropBuffe
                     <Row><Button variant="outline-warning" className="mt-2" onClick={edit}>Edit</Button></Row>
                 </Col>
                 <Col>
-                    <Image src={process.env.REACT_APP_API_URL + 'types/' + (type.img ? type.img : "default.jpg")} height="100px" width="100px" />
+                    <Image src={(type.img ? getFullPath(type.img, 'types/') :process.env.REACT_APP_API_URL+"types/default.jpg")} height="100px" width="100px" />
                 </Col>
                 <Col>Description:{type.description}</Col>
                 <Col style={{ justifyContent: 'left' }} className="align-items-center">

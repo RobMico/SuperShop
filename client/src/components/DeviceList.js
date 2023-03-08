@@ -11,18 +11,16 @@ function LoadDevices(devices, recomendations){
 
         if(recomendations&&i!=0 &&i%4==0)
         {            
-            rows.push(<RecommendedDevices key={i}/>)
+            rows.push(<RecommendedDevices key={"recommend_"+i}/>);
         }
-        rows.push(<DeviceItem key = {devices[i].id} device={devices[i]}/>);
+        rows.push(<DeviceItem key = {"device_"+devices[i].id} device={devices[i]}/>);
     }
     return rows;
 }
 
 
 const DeviceList = observer(({devices, recomendations=true})=>{
-    console.info('deviceList render')
-    //const {devices, types, brands, user} = useContext(Context);
-     
+    console.info('deviceList render');
     return (
         <Row className="d-flex">
             {LoadDevices(devices, recomendations=recomendations)}

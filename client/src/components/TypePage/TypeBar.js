@@ -1,11 +1,12 @@
 import { observer } from "mobx-react-lite";
 import React, { useContext, useEffect, useState } from "react";
-import { ListGroup, Accordion, Row, Form, Col, Button } from "react-bootstrap";
+import { ListGroup, Accordion, Row, Form, Col, Button, Dropdown, DropdownButton } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Context } from "../..";
 import { DEVICES_ROUTE } from "../../utils/consts";
 import { fetchProps } from "../../http/typeAPI";
 import { fetchDevices } from "../../http/deviceAPI";
+import { SortUp, SortDown } from 'react-bootstrap-icons';
 
 var myMap = function (obj, callback) {
     var result = [];
@@ -13,8 +14,7 @@ var myMap = function (obj, callback) {
         if (obj.hasOwnProperty(key)) {
             if (typeof callback === 'function') {
                 let tmp = callback(obj[key], key, obj)
-                if(tmp)
-                {
+                if (tmp) {
                     result.push(tmp);
                 }
             }
@@ -24,61 +24,61 @@ var myMap = function (obj, callback) {
 };
 
 const TypeBar = observer(({ typeId }) => {
-    const { types, devices } = useContext(Context);
-
+    const { devices, filters } = useContext(Context);
+    const [__updater, __setUpdate] = useState(false);
     //LOading dynamic filters for type
     useEffect(() => {
-        if (devices.savedFilters.typeId == typeId) {
+        if (typeId == "custom" || filters.typeId == typeId) {
             return;
         }
         else {
-            fetchProps(typeId).then(data => {                
-                types.setProps(types.parsePropsObj(data, true));
-                devices.setSavedFilters({ dynamic: [], typeId: typeId, result_key:data.result_key })
-            })
+            fetchProps(typeId).then(data => {
+                filters.setFilters(typeId, data.result_key);
+                filters.setProps(filters.parsePropsObj(data, true));
+            });
         }
-    }, [])
+    }, []);
 
-    const _clickFilter = (e) => {        
-        e.checked = !e.checked;        
+    const _clickFilter = (e) => {
+        e.checked = !e.checked;
     }
     const _submit = async () => {
-        let dynamic = myMap(types.props, (val, key)=>{
-            return val.reduce((prev, cur)=>{                
-                if(cur.checked)
-                {
-                    if(!prev)
-                    {
-                        prev = key+"_"+cur.val;
-                    }
-                    else if(Array.isArray(prev))
-                    {
-                        prev.push(key+"_"+cur.val)
-                    }
-                    else
-                    {
-                        prev = [prev, key+"_"+cur.val]
-                    }
-                }
-                return prev;
-            }, null)
-            // if(res)
-            // {
-            //     return res;
-            // }
-        })
-        devices.setSavedFilters({dynamic:dynamic, result_key:null});        
-        const data = await fetchDevices(typeId, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(devices.savedFilters));        
+        let filterObj = filters.getAllFilters();
+        const data = await fetchDevices(typeId, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(filterObj));
         devices.setDevices(data.rows);
         devices.setTotalCount(data.count);
-        devices.setSavedFilters({result_key:data.result_key});
+        filters.setResultKey(data.result_key);
     }
-
-
+    const resetFilters = () => {
+        filters.resetFilters();
+        __setUpdate(!__updater);
+    };
     return (
         <>
             <ListGroup className="mt-2">
-                <Button onClick={e=>{devices.resetStore();_submit()}}>Clear</Button>
+                <Button onClick={resetFilters}>Clear</Button>
+                <Accordion defaultActiveKey="0" alwaysOpen>
+                    <Accordion.Item eventKey="0">
+                        <Accordion.Header>Sort by</Accordion.Header>
+                        <Accordion.Body>
+                            <Row>
+                                <Col> <DropdownButton
+                                    title={filters.sortBy}
+                                    onSelect={(e) => { filters.setSortBy(e) }}
+                                >
+                                    <Dropdown.Item eventKey="price">Price</Dropdown.Item>
+                                    <Dropdown.Item eventKey="rating">Rating</Dropdown.Item>
+                                    <Dropdown.Item eventKey="reviews">Reviews</Dropdown.Item>
+                                </DropdownButton>
+                                </Col>
+                                <Col>{filters.sortOrder ?
+                                    <SortDown style={{ fontSize: '30px' }} onClick={() => { filters.setSortOrder(false) }} /> :
+                                    <SortUp style={{ fontSize: '30px' }} onClick={() => { filters.setSortOrder(true) }} />}
+                                </Col>
+                            </Row>
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
                 <Accordion defaultActiveKey="0" alwaysOpen>
                     <Accordion.Item eventKey="0">
                         <Accordion.Header>Price</Accordion.Header>
@@ -86,18 +86,18 @@ const TypeBar = observer(({ typeId }) => {
                             Price:
                             <Row>
                                 <Col><Form.Control placeholder="min"
-                                    value={devices.savedFilters.minPrice}
-                                    onChange={e => devices.setSavedFilters({ minPrice: e.target.value })} />
+                                    value={filters.priceMin}
+                                    onChange={e => filters.setPriceMin(e.target.value)} />
                                 </Col>
                                 <Col><Form.Control placeholder="max"
-                                    value={devices.savedFilters.maxPrice}
-                                    onChange={e => devices.setSavedFilters({ maxPrice: e.target.value })} />
+                                    value={filters.priceMax}
+                                    onChange={e => filters.setPriceMax(e.target.value)} />
                                 </Col>
                             </Row>
                         </Accordion.Body>
                     </Accordion.Item>
                 </Accordion>
-                {types.props ? myMap(types.props, (el, key) =>
+                {filters.props ? myMap(filters.props, (el, key) =>
                     <Accordion key={key} defaultActiveKey={key} alwaysOpen>
                         <Accordion.Item eventKey={key}>
                             <Accordion.Header>{key}</Accordion.Header>
@@ -106,6 +106,7 @@ const TypeBar = observer(({ typeId }) => {
                                     <Row key={sub.val}>
                                         <Col>
                                             <Form.Check
+                                                key={key + __updater}
                                                 defaultChecked={sub.checked}//{devices.savedFilters.dynamic.includes(key + '_' + sub.val)}
                                                 inline
                                                 label={sub.val}
@@ -121,7 +122,7 @@ const TypeBar = observer(({ typeId }) => {
                             </Accordion.Body>
                         </Accordion.Item>
                     </Accordion>
-                ) : 'Loading'}
+                ) : ''}
             </ListGroup>
 
             <Button style={{ width: "100%" }} onClick={_submit}>Search</Button>

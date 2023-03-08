@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import React, { useContext, useEffect, useState } from "react"
 import { Container, Tabs, Tab, Button, Accordion, Row } from "react-bootstrap"
 import { Context } from "../../../..";
-import { fetchRedisKeys, getRedisFilters } from "../../../../http/adminAPI";
+import { getRedisFilters } from "../../../../http/adminAPI";
 import { fetchTypes } from "../../../../http/typeAPI";
 import RegenerateStorage from "../../../modals/RegenerateStorage";
 
@@ -15,7 +15,6 @@ let RedisFiltersView = () => {
             data.data.sort((a, b)=>a[0]>b[0]);
             _setFilters(data.data);
         });
-        console.log(types.types)
         if (types.types && types.types.length == 0) {
             fetchTypes().then(data => {
                 types.setTypes(data);

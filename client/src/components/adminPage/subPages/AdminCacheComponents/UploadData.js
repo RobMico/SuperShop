@@ -11,7 +11,6 @@ let UploadData = () => {
     const [_file, _setFile] = useState(null);
 
     useEffect(()=>{
-        console.log("DFGHJJHGFGHJBVHJ", types.types)
         if(types.types&&types.types.length==0)
         {
             fetchTypes().then(data=>{

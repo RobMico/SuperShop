@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Button, Form, Modal, Col, Row, Container, Image } from "react-bootstrap";
-import { createType, editType } from "../../http/typeAPI";
+import React, {useState } from "react";
+import { Button, Modal } from "react-bootstrap";
 import AddImagesModal from "./sub/AddImagesModal";
 import RemoveImagesModal from "./sub/RemoveImagesModal";
 

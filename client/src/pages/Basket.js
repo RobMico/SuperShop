@@ -9,10 +9,9 @@ import DeviceItemRow from "../components/basketPage/DeviceItemRow";
 
 const Basket = observer(() => {
   const {basket} = useContext(Context);
-  console.log("BASKET PAGE RENDER")
+  console.info("BASKET PAGE RENDER")
   useEffect(()=>{
     fetchBasket().then(data=>{
-      
       basket.setDevices(data);
     })
   },[])  
@@ -20,7 +19,7 @@ const Basket = observer(() => {
     removeFromBasket(this.id).then(data=>{
       basket.setDevices(basket.devices.filter((el)=>el!=this));
     }).catch(ex=>{
-      console.log(ex);
+      console.error(ex);
       alert(ex.message);
     });
   }  

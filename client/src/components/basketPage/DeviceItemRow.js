@@ -1,16 +1,13 @@
 import React from "react";
-import { Button, Card, Col, Image, Nav, NavLink, Row } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 import { Link, useNavigate } from 'react-router-dom';
 import { DEVICE_ROUTE } from "../../utils/consts";
 import getFullPath from '../../utils/FullFilePath'
 
 
 const DeviceItemRow = ({data, removeFromBasket})=>{    
-    console.log('deviceItem render')
     const navigate = useNavigate();
-    console.log(data.device)
-    let frontIco = data.device.img.split(';')[0]
-    console.log(frontIco)
+    let frontIco = data.device.img.split(';')[0];
     
     return(
     <Card style={{ width: '13rem' }}>

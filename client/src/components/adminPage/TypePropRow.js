@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Col, Container, Row, Image, Card, Button } from "react-bootstrap"
 
-let TypePropRow = ({props, title}) => {        
-    console.log(props)
+let TypePropRow = ({props, title}) => {
     return (
         <Card style={{ width: 'auto', paddingLeft:"25px", paddingRight:"25px", marginTop:"10px", justifyContent:'left'}}>
         <Row xs="auto" className="align-items-center">

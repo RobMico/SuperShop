@@ -9,3 +9,6 @@ server/.tests.env
 server/.production.env
 server/.swp
 client/.env
+dockerImages
+server/logs/*
+server/data

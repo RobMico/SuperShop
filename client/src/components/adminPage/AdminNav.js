@@ -1,8 +1,7 @@
 import { observer } from "mobx-react-lite";
-import React, { useContext, useState } from "react";
-import { Button, Container, Nav, Navbar, NavDropdown, Row } from "react-bootstrap";
+import React, { useState } from "react";
+import { Button, Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { Context } from "../..";
 import { downloadLogs } from "../../http/adminAPI";
 import { ADMIN_BRANDS, ADMIN_DEVICES, ADMIN_TYPES, ADMIN_ADVERT, ADMIN_CACHE } from "../../utils/consts";
 import CreateBrand from "../modals/CreateBrand";

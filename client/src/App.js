@@ -26,7 +26,7 @@ function App() {
     })
   }, [])
   useEffect(()=>{
-    getFileHolders()
+    getFileHolders();
   }, [])
 
 
@@ -42,5 +42,4 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default observer(App);

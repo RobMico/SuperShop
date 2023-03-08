@@ -17,5 +17,9 @@ export const editBrand = async (Data)=>{
 export const fetchBrands = async ()=>{    
     const {data} = await host.get('api/brand');
     return data;
-    
+}
+
+export const fetchCarouselBrands = async ()=>{    
+    const {data} = await host.get('api/brand/carousel');
+    return data;
 }

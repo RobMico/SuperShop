@@ -3,7 +3,9 @@ import jwt_decode from 'jwt-decode';
 
 
 export const registration = async (email, password, name)=>{    
-    const {data} = await host.post('api/user/register', {email:email,password:password,name:name, role:"ADMIN"});        
+    const res = await host.post('api/user/register', {email:email,password:password,name:name, role:"ADMIN"});        
+    console.log(res);
+    const data = res.data;
     try{
         data= JSON.parse(data);
     }catch{}

@@ -26,13 +26,13 @@ const ButtonsPanel = ({ device, isAdmin }) => {
     const _disableDevice =async ()=>{
         await setDeviceDisable(!device.disabled,device.id);
         device.disabled = !device.disabled;        
-        _reremderMe(!_rerenderme)
+        _reremderMe(!_rerenderme);
     }
 
     const _setAvaliable =async ()=>{
         await setDeviceAvaliable(!device.avaliable, device.id)
         device.avaliable = !device.avaliable;
-        _reremderMe(!_rerenderme)
+        _reremderMe(!_rerenderme);
     }
 
     const _editDevice = ()=>{

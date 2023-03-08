@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Button, Form, Modal, Col, Row, Container, Image } from "react-bootstrap";
+import { Button, Form, Modal, Row, Container, Image } from "react-bootstrap";
 import { createType, editType } from "../../http/typeAPI";
+import getFullPath from "../../utils/FullFilePath";
 
 const CreateType = ({ show, onHide, edit }) => {
 
@@ -26,7 +27,6 @@ const CreateType = ({ show, onHide, edit }) => {
 
 
     const _addType = () => {
-        console.log("HHHH1")
         if (!__validate()) {
             return;
         }
@@ -47,12 +47,11 @@ const CreateType = ({ show, onHide, edit }) => {
             } catch {
                 alert(ex.message);
             }
-            console.log(ex);
+            console.error(ex);
         }))
     }
 
     const _editType = async () => {
-        console.log("HHHH2")
         try {
             const formData = new FormData();
             formData.append('typeId', edit.id)
@@ -76,7 +75,7 @@ const CreateType = ({ show, onHide, edit }) => {
             } catch {
                 alert(ex.message);
             }
-            console.log(ex);
+            console.error(ex);
         }
     }
 
@@ -112,7 +111,7 @@ const CreateType = ({ show, onHide, edit }) => {
                     {edit ? <Container className="mt-2">
                         <Form.Label> Current image:</Form.Label>
                         {edit.img ?
-                            <Image src={process.env.REACT_APP_API_URL + 'types/' + edit.img} height="100px" width="100px" />
+                            <Image src={getFullPath(edit.img, 'types/')} height="100px" width="100px" />
                             :
                             'NO IMAGE'
                         }

@@ -9,18 +9,16 @@ const CommentForm=observer(({prototype, ratingId, rerender})=>{
     
     const post = prototype?
     (()=>{
-        console.warn(prototype)
         editComment(prototype.id, comment).then((data)=>{
-            rerender(comment+ratingId)
+            rerender(comment+ratingId);
         }).catch((err)=>{
-            console.warn(err);
             alert("something was wrong");
         });
     })
     :
     (()=>{
         postComment(ratingId, comment).then((data)=>{
-            rerender(comment+ratingId)            
+            rerender(comment+ratingId);
         }).catch((err)=>{
             //console.warn(err);
             alert("something was wrong");
@@ -29,11 +27,11 @@ const CommentForm=observer(({prototype, ratingId, rerender})=>{
     
 
     return(        
-        <Form>            
+        <Form>
             <FormLabel>Enter comment</FormLabel>
             <Form.Control as="textarea" rows={3} value={comment} onChange={e=>setComment(e.target.value)}/>
             <Button onClick={post}>Submit</Button>
-        </Form>                        
+        </Form>
     );
 })
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Modal, Container, Row, Image } from "react-bootstrap";
 import { createBrand, editBrand } from "../../http/brandAPI";
+import getFullPath from "../../utils/FullFilePath";
 
 const CreateBrand = ({ show, onHide, edit }) => {
 
@@ -46,7 +47,7 @@ const CreateBrand = ({ show, onHide, edit }) => {
             } catch {
                 alert(ex.message);
             }
-            console.log(ex);
+            console.error(ex);
         }))
     }
     const _editBrand = () => {
@@ -70,7 +71,7 @@ const CreateBrand = ({ show, onHide, edit }) => {
             } catch {
                 alert(ex.message);
             }
-            console.log(ex);
+            console.error(ex);
         }))
     }
 
@@ -107,7 +108,7 @@ const CreateBrand = ({ show, onHide, edit }) => {
                     {edit ? <Container className="mt-2">
                         <Form.Label> Current image:</Form.Label>
                         {edit.img ?
-                            <Image src={process.env.REACT_APP_API_URL + 'brands/' + edit.img} height="100px" width="100px" />
+                            <Image src={getFullPath(edit.img, 'brands/')} height="100px" width="100px" />
                             :
                             'NO IMAGE'
                         }

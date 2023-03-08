@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React, { useContext } from "react";
-import {BrowserRouter, Route, Redirect, Routes, Switch} from 'react-router-dom';
+import {Route, Routes} from 'react-router-dom';
 import { Context } from "..";
 import Admin from "../pages/Admin";
 import Basket from "../pages/Basket";
@@ -8,8 +8,6 @@ import DevicePage from "../pages/DevicePage";
 import Login from "../pages/Login";
 import Registry from "../pages/Registry";
 import Shop from "../pages/Shop";
-
-import { authRoutes, publicRoutes } from "../routes";
 
 import {ADMIN_CACHE, ADMIN_DEVICES, ADMIN_ADVERT, ADMIN_BRANDS, ADMIN_ROUTE, ADMIN_TYPES, BASKET_ROUTE, DEVICE_ROUTE, LOGIN_ROUTE, REGISTRATION_ROUTE, SHOP_ROUTE, DEVICES_ROUTE } from "../utils/consts";
 import AdminBrands from "./adminPage/subPages/AdminBrands";

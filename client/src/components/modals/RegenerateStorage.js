@@ -1,13 +1,12 @@
 import { observer } from "mobx-react-lite";
-import React, { useContext, useEffect, useState } from "react";
-import { Button, Col, Dropdown, DropdownButton, Form, InputGroup, Modal, Row } from "react-bootstrap";
+import React, { useState } from "react";
+import { Button, Form, Modal } from "react-bootstrap";
 import {regenerateRedisStorage} from "../../http/adminAPI";
 
 
 const RegenerateStorage = ({ show, onHide}) => {
     const [_rawJson, _setRawJson] = useState('');
     const _submit = ()=>{
-        console.log(_rawJson);
         regenerateRedisStorage(_rawJson).then(e=>{
             alert(e.data);
         })

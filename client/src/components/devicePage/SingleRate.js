@@ -9,7 +9,6 @@ const SingleRate = ({rating, user, rerenderCallback, rerenderVar})=>{
         setShow(false);
     }, [rerenderVar])
     rating.comments = rating.comments.sort((a, b)=>a.id<b.id);    
-    console.log(rating)
     let arr = [];
     for (let i = 1; i <= 5; i++) {
         if (rating.rate >= i) {

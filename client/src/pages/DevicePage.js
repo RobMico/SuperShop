@@ -37,7 +37,7 @@ const DevicePage = () => {
         </Col>
         <Col md={4}>
           <BuyPanel device={device} isAdmin={isAdmin}/>          
-        </Col>        
+        </Col>
       </Row>
       
       <RecommendedDevices/>

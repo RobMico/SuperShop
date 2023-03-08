@@ -4,6 +4,7 @@ import { Col, Container, Row } from "react-bootstrap";
 import { Context } from "..";
 import DeviceList from "../components/DeviceList";
 import Pages from "../components/Pages";
+import BrandsCarousel from "../components/shopPage/BrandsCarousel";
 import TypeObserver from "../components/TypeObserver";
 import { fetchDevices } from "../http/deviceAPI";
 import { fetchTypes } from '../http/typeAPI';
@@ -41,7 +42,6 @@ const Shop = observer(() => {
     });
   }, [devices.page]);
 
-
   return (
     <Container>
       {loaded ?
@@ -50,11 +50,9 @@ const Shop = observer(() => {
             <TypeObserver />
           </Col>
           <Col md={10}>
-            <>BANER</>
-            <>BRANDS</>
-            <>TODO</>
+            <BrandsCarousel/>
             <DeviceList devices={devices.devices} __rerender={_rerender} />
-            <Pages />
+            {/* <Pages /> */}
           </Col>
         </Row>
         : <></>}

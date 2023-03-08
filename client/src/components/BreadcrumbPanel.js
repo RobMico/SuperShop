@@ -12,24 +12,22 @@ const BreadcrumbPanel = ({ typeId, typeName, deviceName }) => {
         if (typeId && !typeName) {
             if (types.types.length > 0) {
                 let tmp = types.types.find(e => e.id == typeId)
-                console.log(tmp)
                 if (tmp) {
-                    _setTypeName(tmp.name)
+                    _setTypeName(tmp.name);
                 }
                 else {
-                    _setTypeName("custom query")
+                    _setTypeName("custom query");
                 }
             }
             else {
                 fetchTypes().then(data => {
                     types.setTypes(data);
                     let tmp = types.types.find(e => e.id == typeId)
-                    console.log(tmp)
                     if (tmp) {
-                        _setTypeName(tmp.name)
+                        _setTypeName(tmp.name);
                     }
                     else {
-                        _setTypeName("custom query")
+                        _setTypeName("custom query");
                     }
                 })
             }

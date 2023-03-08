@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react"
-import { Container, Tabs, Tab, Button, Accordion } from "react-bootstrap"
+import React, { useEffect, useState } from "react"
+import { Container, Button, Accordion } from "react-bootstrap"
 import { clearRedisCache, fetchRedisKeys } from "../../../../http/adminAPI";
 
 let RedisKeysView = () => {

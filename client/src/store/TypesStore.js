@@ -31,33 +31,6 @@ export default class TypeStore {
     get selectedType() {
         return this._selectedType;
     }
-
-    setProps(val) {
-        this._props = val;
-    }
-
-    get props() {
-        return this._props;
-    }
-
-    parsePropsObj(val, removeZeros = false) {
-        let tmp;
-        let res = val.reduce((prev, cur) => {
-            if (removeZeros) {
-                if (cur.count != 0) {
-                    tmp = cur.str.split("_")
-                    prev[tmp[0]] ? prev[tmp[0]].push({val:tmp[1], count:cur.count, checked:false}) : (prev[tmp[0]] = [{val:tmp[1], count:cur.count, checked:false}])
-                }
-            }
-            else {
-                tmp = cur.str.split("_")
-                prev[tmp[0]] ? prev[tmp[0]].push(tmp[1]) : (prev[tmp[0]] = [tmp[1]])
-            }
-            return prev;
-        }, {})
-        return res;
-    }
-
     parsePropsArr(val) {
         let tmp;
         let res = val.reduce((prev, cur) => {
@@ -80,6 +53,4 @@ export default class TypeStore {
             return null;
         }
     }
-
-
 }

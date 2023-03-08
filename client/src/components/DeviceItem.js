@@ -13,10 +13,10 @@ const DeviceItem = ({ device }) => {
             alert("successfully added")
         }).catch(e=>{
             alert("error occured")
-            console.error(e)
+            console.error(e);
         })
     }
-    console.info('deviceItem render')
+    console.info('deviceItem render');
     const navigate = useNavigate();
     return (
         // <Col md={5} className="mt-1">

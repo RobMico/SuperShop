@@ -44,7 +44,7 @@ const Login = observer(() => {
         user.setIsAuth(true);
         navigator(SHOP_ROUTE);
       } catch (ex) {
-        console.log(ex)
+        console.error(ex)
         if (ex.response) {
           alert(ex.response.data.message);
         } else {

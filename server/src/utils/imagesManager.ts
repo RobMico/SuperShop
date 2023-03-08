@@ -5,6 +5,14 @@ import * as uuid from 'uuid';
 import { UploadedFile } from "express-fileupload";
 
 class ImagesManager {
+    static removeFile(fileName: string, filePath: string) {
+        fileName = fileName.replace('%0:', '');
+        fs.unlink(path.join(process.env.static, filePath, fileName), (err) => {
+            if (err) {
+                //TODO: logging
+            }
+        });
+    }
     /*
         param filePath will be added to static dir
         allowedExtensions filter incoming files by file allowedExtensions

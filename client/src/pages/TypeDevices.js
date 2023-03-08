@@ -13,7 +13,7 @@ import BreadcrumbPanel from "../components/BreadcrumbPanel";
 
 const TypeDevices = observer(() => {
     console.info("TypeDevices render")
-    const { devices, types, brands } = useContext(Context);
+    const { devices, brands, filters } = useContext(Context);
     const { typeId } = useParams();
     const [loaded, setLoaded] = useState(false);
 
@@ -23,11 +23,13 @@ const TypeDevices = observer(() => {
         const [__rerenderMe, __setRerenderMe] = useState(null);
         devices.__rerenderTypeDevices = __setRerenderMe;
         useEffect(() => {
-            fetchDevices(null, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(devices.savedFilters)).then(data => {
-                setLoaded(true);
-                devices.setDevices(data.rows);
-                devices.setTotalCount(data.count);
-            });
+            if (loaded) {
+                fetchDevices(null, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(filters.lastFilters)).then(data => {
+                    setLoaded(true);
+                    devices.setDevices(data.rows);
+                    devices.setTotalCount(data.count);
+                });
+            }
         }, [__rerenderMe]);
     }
 
@@ -35,24 +37,24 @@ const TypeDevices = observer(() => {
 
     //LOAD DEVICES ON PAGE LOADED
     useEffect(() => {
-        console.log("USE EFFECT")
         if (typeId == "custom") {
-            fetchDevices(null, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(devices.savedFilters)).then(data => {
+            fetchDevices(null, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(filters.lastFilters)).then(data => {
                 setLoaded(true);
                 devices.setDevices(data.rows);
                 devices.setTotalCount(data.count);
+                //filters.setResultKey();
             });
         }
         else if (typeId) {
-            if (devices.savedFilters.typeId == typeId) {
-                fetchDevices(typeId, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(devices.savedFilters)).then(data => {
+            if (filters.typeId == typeId) {
+                fetchDevices(typeId, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(filters.lastFilters)).then(data => {
                     setLoaded(true);
                     devices.setDevices(data.rows);
                     devices.setTotalCount(data.count);
                 });
             }
             else {
-                devices.resetStore();
+                filters.resetAll();
                 fetchDevices(typeId, devices.limit).then(data => {
                     devices.setDevices(data.rows);
                     devices.setTotalCount(data.count);
@@ -64,9 +66,8 @@ const TypeDevices = observer(() => {
 
     //LOAD DEVICES ON PAGINATION
     useEffect(() => {
-        //console.log("PAGINATION PAGINATION")
         if (loaded) {
-            fetchDevices(typeId == "custom" ? null : typeId, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(devices.savedFilters)).then(data => {
+            fetchDevices(typeId == "custom" ? null : typeId, devices.limit, (devices.page - 1) * devices.limit, JSON.stringify(filters.lastFilters)).then(data => {
                 devices.setDevices(data.rows);
                 devices.setTotalCount(data.count);
             });
@@ -84,7 +85,7 @@ const TypeDevices = observer(() => {
                 <Col md={10}>
                     <BreadcrumbPanel typeId={typeId} />
                     <DeviceList devices={devices.devices} />
-                    <Pages paginationKey={"main"} />
+                    <Pages />
                 </Col>
             </Row>
             : <></>}

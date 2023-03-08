@@ -7,12 +7,13 @@ import DeviceStore from './store/DeviceStore';
 import TypeStore from './store/TypesStore';
 import BrandStore from './store/BrandStore';
 import BasketStore from './store/BasketStore';
+import FiltersStore from './store/FiltersStore';
 //import reportWebVitals from './reportWebVitals';
 
 
 export const Context = createContext(null);
 const root = ReactDOM.createRoot(document.getElementById('root'));
-console.debug("index render")
+console.info("index render")
 root.render(
   <Context.Provider value={
     {
@@ -20,7 +21,8 @@ root.render(
       devices:new DeviceStore(),
       types:new TypeStore(),
       brands:new BrandStore(),
-      basket:new BasketStore()
+      basket:new BasketStore(),
+      filters:new FiltersStore()
     }}>
     
       <App />

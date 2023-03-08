@@ -4,7 +4,7 @@ import { Card, ListGroup, Nav, Row } from "react-bootstrap";
 import { Context } from "..";
 
 const BrandBar = observer(()=>{
-    console.log('Brand bar render');
+    console.info('Brand bar render');
     const {brands, devices} = useContext(Context);
     return(
         <ul className="row list-group-horizontal m-2">
