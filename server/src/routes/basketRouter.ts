@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import basketControler from '../controlers/basketController';
+import basketControler from '../controlers/BasketController';
 import checkRole from '../middleware/checkRoleMiddleware';
 import authMiddleware from '../middleware/authMiddleware';
 

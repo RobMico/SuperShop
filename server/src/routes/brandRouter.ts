@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import brandControler from '../controlers/brandController';
+import brandControler from '../controlers/BrandController';
 import checkRole from '../middleware/checkRoleMiddleware';
 
 router.post('/',checkRole('ADMIN'), brandControler.createBrand);

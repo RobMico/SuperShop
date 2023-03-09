@@ -1,7 +1,15 @@
-import { DeviceInfoDto } from "../dto/Device/CreateDeviceDto";
+import CreateDeviceRawDto from "../dto/Admin/CreateDeviceRawDto";
+import DeviceInfoDto from "../dto/Device/DeviceInfoDto";
 import ApiError from "../error/ApiError";
 
 export default class Validator {
+    static ValidateDevicesArr(data: any): CreateDeviceRawDto[] {
+        if (!Array.isArray(data)) {
+            throw ApiError.validationError('data is not array');
+        }
+
+        return data.map(el=>new CreateDeviceRawDto(el));
+    }
     static ValidateDeviceName(str: any): string {
         if (typeof str !== 'string' || str.length === 0) {
             throw ApiError.validationError('Incorrect device name');
@@ -83,8 +91,8 @@ export default class Validator {
         if (typeof bool == "boolean") {
             return bool;
         }
-        
-        
+
+
         if (require) {
             throw ApiError.validationError(`Validation error, ${objectName} is not boolean`);
         }

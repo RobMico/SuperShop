@@ -4,6 +4,8 @@ import redisCacheControl from './redisCacheControl';
 import Logger from './logger';
 const logger = Logger(module);
 import { commandOptions } from 'redis';
+import DeviceInfoModel from '../models/DeviceInfoModel';
+import DeviceInfoDto from '../dto/Device/DeviceInfoDto';
 //import { set } from '../db';
 
 //let client = require('../redisClient');
@@ -11,13 +13,18 @@ import { commandOptions } from 'redis';
 //const redisCacheControl = require('../utils/redisCacheControl');
 //const logger = require('../utils/logger')(module);
 
-
+interface getIdsResultObject {
+    result_key: string;
+    ids: number[];
+}
 
 
 class FilterWorker {
-    lockTypeUpdate = false;
-    unlockTypeUpdate = [];
-    GetBits(bytes) {
+    async GetAllKeys() {
+        let data = await client.keys('*');
+        return data;
+    }
+    GetBits(bytes: Buffer) {
         let ids = [];
         for (let i = 0; i < bytes.length; i++) {        // iterate in bytes (8 products at once)
             for (let j = 7; j >= 0; j--) {              // iterate over bits in current 8-products chunk                
@@ -91,130 +98,88 @@ class FilterWorker {
         return result;
     }
 
-
-
-
-    
-    async addDevice(props, deviceId: number, typeId: number) {
-        let stored = await client.lRange(('type_' + typeId), 0, -1);
+    async addDevice(props: DeviceInfoDto[], deviceId: number, typeId: number) {
+        //get all filters on this type
+        let storedFilters = await client.lRange(('type_' + typeId), 0, -1);
+        //set device on type list
         await client.setBit(('typeD_' + typeId), deviceId, 1);
-
-        props.forEach(e1 => {
-            let tmp = e1.title + '_' + e1.textPart;
-            stored.forEach(e2 => {
-                if (tmp == e2) {
-                    client.setBit(e2, deviceId, 1)
-                }
-            })
-        });
+        for (const prop of props) {
+            let filter = prop.title + '_' + prop.textPart;
+            if (storedFilters.includes(filter)) {
+                await client.setBit(filter, deviceId, 1)
+            }
+        };
         return true;
     }
 
-    // async checkType(typeId: number) {
-    //     if (!this.lockTypeUpdate) {
-    //         this.lockTypeUpdate = true;
-
-    //         let tmp = await client.lRange(('type_' + typeId), 0, -1);
-    //         let set = new Set(tmp);
-
-    //         await client.del(('type_' + typeId));
-    //         await client.lPush(('type_' + typeId), [...set]);
-
-
-    //         for (const e of this.unlockTypeUpdate) {
-    //             await e();
-    //         }
-    //         this.unlockTypeUpdate = [];
-    //         this.lockTypeUpdate = false;
-    //         return true
-    //     }
-    //     else {
-    //         this.unlockTypeUpdate.push(async () => {
-    //             let tmp = await client.lRange(('type' + typeId), 0, -1)
-    //             let set = new Set(tmp);
-    //             await client.del(('type' + typeId))
-    //             await client.lPush(('type' + typeId), [...set])
-    //         })
-    //     }
-    // }
-
-
-    //create bitmap for new type
-
-
-    async getIds(filters, resultKey, typeId: number) {
-        if (!filters || filters.length == 0) {//exit if no filters
-            return;
-        }
-        if (resultKey) { //if such a request has been executed before, load it
-            let cache = await client.get(commandOptions({ returnBuffers: true }), resultKey);
-            if (cache) {
-                logger.info("getIds;loading from cache");
-                let ids = this.GetBits(cache);
-                return [ids, resultKey];
-            }
-        }
-
-        //if cache storing disabled all temporary data keys will be stored in this arr, and will be deleted after
-        let removeAfter = [];
+    async getIds(filters: (string[] | string)[], resultKey: string, typeId: number): Promise<getIdsResultObject> {
         //there are two operations in filters OR for same attribute and AND for different attributes
         //we gots it like [["color_blue" OR "color_red"] AND "RAM_16" AND ["" OR "" OR ""] ...]
         //so firstly we iterate through AND array and executing all OR op saving result keys to "concated",
         //then executing AND for concated
-        let concated = Array(filters.length);
-        for (let i = 0; i < concated.length; i++) {//executing OR
+
+        if (resultKey) { //if such a request has been executed before, load it
+            let cache = await client.get(commandOptions({ returnBuffers: true }), resultKey);
+            if (cache) {
+                let ids = this.GetBits(cache);
+                return { result_key: resultKey, ids: ids };
+            }
+        }
+
+        //[["color_blue" OR "color_red"] AND "RAM_16" AND ["" OR "" OR ""] ...]=>["color_blue,color_red" AND "RAM_16" AND "" AND ...]
+        let concated: string[] = Array(filters.length);//AND Array
+        for (let i = 0; i < concated.length; i++) {//executing OR ops
             if (!Array.isArray(filters[i])) {//if no OR op to execute - just store key
-                concated[i] = filters[i];
+                concated[i] = filters[i].toString();
             }
             else {
-                let temp = "*_" + filters[i]
-                concated[i] = temp;
+                let ORKeyName = "*_" + filters[i]
+                concated[i] = ORKeyName;
                 //check cache                
-                let cache = await client.exists("*_" + filters[i])
-                if (cache) {
-                    logger.info("getIds;loading from cache filters");
+                let isStored = await client.exists(ORKeyName)
+                if (isStored) {
+                    //logger.info("getIds;loading from cache filters");
                     continue;
                 }
                 else {//if no cache
-                    await client.bitOp('OR', temp, filters[i])
-                    if (redisCacheControl.useCache) {
-                        await redisCacheControl.saveFilterConcat(temp)
-                    }
-                    else {
-                        removeAfter.push(temp);
-                    }
+                    await client.bitOp('OR', ORKeyName, filters[i])
                 }
             }
         }
 
-        if (typeId) {
+        if (typeId) {//apply typeId filter if require
             concated.push('typeD_' + typeId);
         }
 
+        //["color_blue,color_red" AND "RAM_16" AND "" AND ...] => Bitmap
         let result_key = "*_" + uuid.v4();
-        //executing AND op for concated
-        await client.bitOp('AND', result_key, concated)
-        let tmp = await client.get(commandOptions({ returnBuffers: true }), result_key)
+        await client.bitOp('AND', result_key, concated);//executing AND op for concated
 
-        if (redisCacheControl.useCache) {//if cache enabled, store keys to cache storage
-            await redisCacheControl.saveFilterConcat(result_key);
-        }
-        else {//else remove all temporary data
-            await client.del(removeAfter);
-            await client.del(result_key);
-        }
+        let resultBitmap = await client.get(commandOptions({ returnBuffers: true }), result_key)
 
 
-        if (!tmp) {
-            return [null, null];
+        if (!resultBitmap) {
+            return null;
         }
         //Getting bits from bitmap
-        let ids = this.GetBits(tmp)
-        return [ids, result_key];
+        let ids = this.GetBits(resultBitmap);
+        return { result_key, ids };
     }
-    async regenerateStorageStructure(map) {
+    
+    async getRedisTypes() {
+        let types: string[] = await client.keys('type_*');
+        let res: string[][] = [];
+        for (const type of types) {
+            let tmp: string[] = await client.lRange(type, 0, -1);
+            res.push([type.replace('type_', ''), ...tmp]);
+        }
+        return res;
+    }
+
+
+    async regenerateStorageStructure(map: any[]) {
         let resultSet = new Set();
-        await client.sendCommand(['FLUSHALL']);
+        await client.sendCommand(['FLUSHALL']);//Clear redis
         for (const e of map) {
 
             for (let i = 0; i < e.length; i++) {
@@ -244,15 +209,7 @@ class FilterWorker {
             }
         }
     }
-    async getRedisTypes() {
-        let data = <string[]>await client.keys('type_*');
-        let res = [];
-        for (const el of data) {
-            let tmp = await client.lRange(el, 0, -1);
-            res.push([el.replace('type_', ''), ...tmp]);
-        }
-        return res;
-    }
+
 }
 
 export default new FilterWorker();

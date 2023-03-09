@@ -1,27 +1,27 @@
 import express from 'express';
 const router = express.Router();
 
-import deviceControler from '../controlers/deviceControler';
+import DeviceController from '../controlers/DeviceController';
 import authMiddleware from '../middleware/authMiddleware';
 import optionalAuthMiddleware from '../middleware/optionalAuthMiddleware';
 import checkRole from '../middleware/checkRoleMiddleware';
 import ErrorHandlerWrap from '../middleware/errorHandlerWrap';
 
 
-router.get('/', deviceControler.getAll);
-router.get('/rating', optionalAuthMiddleware, deviceControler.loadRating);
-router.post('/rating', authMiddleware, deviceControler.postRating);
-router.post('/editimgs', checkRole("ADMIN"), deviceControler.editImages);
-router.post('/', checkRole('ADMIN'), deviceControler.create);
-router.post('/editdevice', checkRole("ADMIN"), deviceControler.editDevice);
-router.get('/disabled', checkRole("ADMIN"), deviceControler.getDisabled);
-router.post('/setdisable', checkRole("ADMIN"), deviceControler.setDisable);
-router.post('/setavaliable', checkRole("ADMIN"), deviceControler.setAvaliable);
+router.get('/', DeviceController.getAll);
+router.get('/rating', optionalAuthMiddleware, DeviceController.loadRating);
+router.post('/rating', authMiddleware, DeviceController.postRating);
+router.post('/editimgs', checkRole("ADMIN"), DeviceController.editImages);
+router.post('/', checkRole('ADMIN'), DeviceController.createDevice);
+router.post('/editdevice', checkRole("ADMIN"), DeviceController.editDevice);
+router.get('/disabled', checkRole("ADMIN"), DeviceController.getDisabled);
+router.post('/setdisable', checkRole("ADMIN"), DeviceController.setDisable);
+router.post('/setavaliable', checkRole("ADMIN"), DeviceController.setAvaliable);
 
 //router.post('/rmd', checkRole('ADMIN'), deviceControler.removeOne);
 
 //router.post('/rmr', checkRole('ADMIN'), deviceControler.removeRating);
 
-router.get('/:id', deviceControler.getOne);
+router.get('/:id', DeviceController.getOne);
 
 export default router;

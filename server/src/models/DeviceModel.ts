@@ -13,6 +13,7 @@ interface DeviceCreationAttributes {
     avaliable?: boolean;
     typeId:number;
     brandId:number;
+    img:string;
 }
 
 @Table({ tableName: 'device' })
