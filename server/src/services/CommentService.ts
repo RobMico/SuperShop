@@ -6,7 +6,6 @@ import ErrorHandlerWrap from "../middleware/errorHandlerWrap";
 import CommentsModel from "../models/CommentsModel";
 
 class CommentService {
-    @ErrorHandlerWrap
     async removeComment(commentId: number) {
         const result = await CommentsModel.destroy({ where: { id: commentId } });
         if (result === 0) {
@@ -14,7 +13,6 @@ class CommentService {
         }
         return result;
     }
-    @ErrorHandlerWrap
     async editComment(commentDto: EditCommentDto, user: TokenUserData) {
         const result = await CommentsModel.update({ comment: commentDto.comment }, { where: { id: commentDto.commentId, userId: user.id } });
         if (result[0] === 0) {
@@ -22,7 +20,6 @@ class CommentService {
         }
         return result;
     }
-    @ErrorHandlerWrap
     async createComment(commentDto: CreateCommentDto, user: TokenUserData) {
         const result = await CommentsModel.create({ comment: commentDto.comment, rateId: commentDto.rateId, userName: user.email, userId: user.id });
         return result;

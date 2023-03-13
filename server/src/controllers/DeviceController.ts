@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { UploadedFile } from "express-fileupload";
 import CreateDeviceDto from "../dto/Device/CreateDeviceDto";
 import CreateRateDto from "../dto/Device/CreateRateDto";
 import EditDeviceDto from "../dto/Device/EditDeviceDto";
@@ -15,8 +16,8 @@ class DeviceController {
     @ErrorHandlerWrap
     async createDevice(req: Request, res: Response, next: NextFunction) {
         const deviceDto = new CreateDeviceDto(req.body);
-        if (req.files && req.files.img) {
-            const result = await DeviceService.createDevice(deviceDto, req.files.img);
+        if (req.files && req.files.img && Array.isArray(req.files.img)) {
+            const result = await DeviceService.createDevice(deviceDto, req.files.img as UploadedFile[]);
             return res.json(result);
         }
         const result = await DeviceService.createDevice(deviceDto);
@@ -25,7 +26,7 @@ class DeviceController {
 
     @ErrorHandlerWrap
     async getAll(req: Request, res: Response, next: NextFunction) {
-        const getDevicesDto = new GetAllDevicesDto(req.body);
+        const getDevicesDto = new GetAllDevicesDto(req.query);
         const result = await DeviceService.getAll(getDevicesDto);
         return res.json(result);
     }
@@ -83,8 +84,8 @@ class DeviceController {
 
     @ErrorHandlerWrap
     async loadRating(req: Request, res: Response, next: NextFunction) {
-        const deviceId = Validator.ValidatePositiveNumber(req.body.deviceId);
-        const selector = new SelectorDto(req.body);
+        const deviceId = Validator.ValidatePositiveNumber(req.query.deviceId);
+        const selector = new SelectorDto(req.query);
         const rating = await DeviceService.getRatings(deviceId, selector);
         return res.json(rating);
     }

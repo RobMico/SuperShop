@@ -10,7 +10,7 @@ let load = ()=>{
 }
 load();
 
-var getFullPath = function (img, path) {
+var getFullPath = function (img, path='devices/') {
     
     if(!filesHolders)
     {

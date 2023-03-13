@@ -6,8 +6,8 @@ import RatingModel from "./RatingModel";
 interface CommentsCreationAttributes {
     comment: string;
     userName: string;
-    userId:number;
-    rateId:number;
+    userId: number;
+    rateId: number;
 }
 
 
@@ -25,17 +25,17 @@ export default class CommentsModel extends Model<CommentsModel, CommentsCreation
     @Column({ type: DataTypes.STRING, allowNull: false })
     userName: string;
 
-    @ForeignKey(()=>UserModel)
-    @Column({type: DataTypes.INTEGER})
-    userId:number;
+    @ForeignKey(() => UserModel)
+    @Column({ type: DataTypes.INTEGER, allowNull: true})
+    userId: number;
 
-    @BelongsTo(()=>UserModel)
-    user:UserModel;
+    @BelongsTo(() => UserModel)
+    user: UserModel;
 
-    @ForeignKey(()=>RatingModel)
-    @Column({type: DataTypes.INTEGER})
-    rateId:number;
+    @ForeignKey(() => RatingModel)
+    @Column({ type: DataTypes.INTEGER, allowNull: true })
+    rateId: number;
 
-    @BelongsTo(()=>RatingModel)
-    rate:UserModel;
+    @BelongsTo(() => RatingModel)
+    rate: UserModel;
 }

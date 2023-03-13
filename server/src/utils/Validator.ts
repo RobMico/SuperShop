@@ -8,7 +8,7 @@ export default class Validator {
             throw ApiError.validationError('data is not array');
         }
 
-        return data.map(el=>new CreateDeviceRawDto(el));
+        return data.map(el => new CreateDeviceRawDto(el));
     }
     static ValidateDeviceName(str: any): string {
         if (typeof str !== 'string' || str.length === 0) {
@@ -82,12 +82,21 @@ export default class Validator {
         }
     }
     static ValidateDeviceInfo(info: any) {
+        if (typeof info === "string") {
+            info = JSON.parse(info);
+        }
         if (!Array.isArray(info)) {
             throw ApiError.validationError(`Validation error, info is not array`);
         }
         return info.map(el => new DeviceInfoDto(el));
     }
     static ValidateBoolean(bool: any, objectName: string = 'disabled'): boolean {
+        if (bool === "true") {
+            return true;
+        }
+        if (bool === "false") {
+            return false;
+        }
         if (typeof bool == "boolean") {
             return bool;
         }
@@ -104,6 +113,14 @@ export default class Validator {
     static passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
     static ValidatePropsValues(values: any, objectName = 'values'): string[] {
+        if (typeof values === "string") {
+            try {
+                values = JSON.parse(values);
+            } catch (ex) {
+                throw ApiError.validationError('Validation error, ${objectName} is not array');
+            }
+        }
+
         if (!Array.isArray(values)) {
             throw ApiError.validationError(`Validation error, ${objectName} is not array`);
         }

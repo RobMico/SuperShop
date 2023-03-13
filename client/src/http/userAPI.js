@@ -2,37 +2,40 @@ import { authHost, host } from ".";
 import jwt_decode from 'jwt-decode';
 
 
-export const registration = async (email, password, name)=>{    
-    const res = await host.post('api/user/register', {email:email,password:password,name:name, role:"ADMIN"});        
-    console.log(res);
-    const data = res.data;
-    try{
-        data= JSON.parse(data);
-    }catch{}
+export const registration = async (email, password, name) => {
+    let {data} = await host.post('api/user/register', { email: email, password: password, name: name });
+    try {
+        data = JSON.parse(data);
+    } catch { }
     localStorage.setItem('token', data.token);
     return jwt_decode(data.token);
 }
 
-export const login = async (email, password)=>{
-    const {data} = await host.post('api/user/login', {email:email,password:password});    
-    try{
-        data= JSON.parse(data);
-    }catch{}    
+export const login = async (email, password) => {
+    let { data } = await host.post('api/user/login', { email: email, password: password });
+
+    try {
+        data = JSON.parse(data);
+
+    } catch { }
     localStorage.setItem('token', data.token);
     return jwt_decode(data.token);
 }
 
-export const check = async ()=>{
-    try{
-        const {data} = await authHost.get('api/user/auth');
-        try{
-            data= JSON.parse(data);
-        }catch{}
+export const check = async () => {
+    console.log("HI")
+    try {
+        console.log('1');
+        let { data } = await authHost.get('api/user/auth');
+        console.log(data);
+        try {
+            data = JSON.parse(data);
+        } catch { }
 
-        localStorage.setItem('token', data.token);        
+        localStorage.setItem('token', data.token);
         return jwt_decode(data.token);
-    }catch(ex)
-    {
+    } catch (ex) {
+        console.log(ex);
         localStorage.removeItem('token');
         throw ex;
     }

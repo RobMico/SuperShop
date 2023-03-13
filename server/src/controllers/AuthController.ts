@@ -12,19 +12,20 @@ class AuthControler {
     async registration(req: Request, res: Response, next: NextFunction) {
         const userDto = new UserRegistrationDto(req.body);
         let token = await AuthService.registration(userDto);
-        return res.json(token);
+        return res.json({token});
     }
     @ErrorHandlerWrap
     async login(req: Request, res: Response, next: NextFunction) {
         const userDto = new UserLoginDto(req.body);
         let token = await AuthService.login(userDto);
-        return res.json(token);
+        console.log("JJJJJJJJDD", token);
+        return res.json({token});
     }
     @ErrorHandlerWrap
     async checkAuth(req: AuthRequest, res: Response, next: NextFunction) {
         const user: TokenUserData = req.user;
         const token = await AuthService.recreateToken(user);
-        return res.json(token);
+        return res.json({token});
     }
 }
 

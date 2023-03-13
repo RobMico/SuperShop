@@ -9,9 +9,9 @@ export default class SelectorDto {
         if ((!body.page && !body.offset)) {
             throw ApiError.badRequest('page, offset undefined');
         }
-        this.limit = Validator.ValidatePositiveNumber(body.limit);
+        this.limit = Validator.ValidatePositiveNumber(body.limit, 'limit');
         if (body.page) {
-            this.page = Validator.ValidatePositiveNumber(body.page);
+            this.page = Validator.ValidatePositiveNumber(body.page)-1;
             this.offset = this.limit * this.page;
         }
         else{

@@ -178,9 +178,9 @@ class DeviceService {
 
         if (getDevicesDto.dynamic) {
             let res = await RedisFilterWorker.getIds(getDevicesDto.dynamic, getDevicesDto.result_key, getDevicesDto.typeId)
-            result_key = res[1];
-            if (res[0]) {
-                getDevicesDto.deviceIds = res[0];
+            if (res) {
+                result_key = res.result_key;
+                getDevicesDto.deviceIds = res.ids;
             }
         }
 
@@ -193,7 +193,7 @@ class DeviceService {
     async createDevice(deviceDto: CreateDeviceDto, img?) {
         if (img) {
             const imageManager = new ImagesManager('/devices');
-            deviceDto.img = await imageManager.saveFile(img);
+            deviceDto.img = await imageManager.saveFiles(img);
             try {
                 await db.transaction(async (t) => {
                     const device = await DeviceModel.create(deviceDto, { transaction: t });

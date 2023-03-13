@@ -15,12 +15,10 @@ function ErrorHandlerWrap(target: Object, method: string, descriptor: PropertyDe
                 return res.status(ex.status).json({ message: ex.message });
             }
             if (ex instanceof BaseError) {
-                //TODO: processing different types of sequelize errors
-                console.log(ex);
-                return res.status(400).json({ message: ex.message, type:'sequelize' });
+                return res.json({ message: ex.message, type: 'sequelize' });
             }
             logger.error("Unhandled error", ex);
-            res.status(500).json({ message: "Unhandled error" })
+            return res.status(500).json({ message: "Unhandled error" })
         }
     }
 }

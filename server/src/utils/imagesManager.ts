@@ -40,8 +40,8 @@ class ImagesManager {
         for (let i = 0; i < files.length; i++) {
             let extension = files[i].name.split('.').pop();
 
-            if (ImagesManager.allowedExtensions.includes(extension)) {
-                throw ApiError.validationError('File extension is not valid');
+            if (!ImagesManager.allowedExtensions.includes(extension)) {
+                throw ApiError.validationError(`File extension is not valid "${extension}"`);
             }
             if (files[i].size > ImagesManager.maxFileSize)//5200000 5mb
             {
@@ -71,7 +71,7 @@ class ImagesManager {
         let extension = file.name.split('.').pop();
 
         if (!ImagesManager.allowedExtensions.includes(extension)) {
-            throw ApiError.validationError('File extension is not valid');
+            throw ApiError.validationError(`File extension is not valid "${extension}"`);
         }
         if (file.size > ImagesManager.maxFileSize) {
             throw ApiError.validationError('File is too big');

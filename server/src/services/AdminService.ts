@@ -5,6 +5,7 @@ import BrandModel from "../models/BrandModel";
 import DeviceInfoModel from "../models/DeviceInfoModel";
 import DeviceModel from "../models/DeviceModel";
 import TypesModel from "../models/TypeModel";
+import RedisCacheController from "../utils/RedisCacheController";
 import RedisFilterWorker from "../utils/RedisFilterWorker";
 
 class AdminService {
@@ -56,11 +57,10 @@ class AdminService {
         return 'ok';
     }
     async clearCache() {
-        //TODO
-        //redisCacheControl.removeCache();
+        await RedisCacheController.clearCache();
     }
-    async getRedisTypes() {
-        const data = await RedisFilterWorker.getRedisTypes();
+    async getRedisStorageMap() {
+        const data = await RedisFilterWorker.getRedisStorageMap();
         return data;
     }
     async getAllRedisKeys() {

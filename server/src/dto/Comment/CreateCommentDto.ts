@@ -5,6 +5,6 @@ export default class CreateCommentDto{
     rateId:number;
     constructor(body:any){
         this.comment = Validator.ValidateString(body.comment, true, 'comment');
-        this.rateId = Validator.ValidatePositiveNumber(body.rateId, 'rateId');
+        this.rateId = Validator.ValidatePositiveNumber(body.ratingId, 'rateId');
     }
 }

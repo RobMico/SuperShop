@@ -7,18 +7,15 @@ import BrandService from "../services/BrandService";
 import AuthRequest from "../utils/authRequest";
 import ImagesManager from "../utils/imagesManager";
 
-const { Brand, sequelize } = require('../models/models');
-const fileWorker = require('../utils/fileWorker');
-
 class BrandController {
     @ErrorHandlerWrap
     async createBrand(req: AuthRequest, res: Response, next: NextFunction) {
         const brandDto = new CreateBrandDto(req.body);
         let img: ImagesManager;
 
-        if (req.files.img) {
+        if (req.files && req.files.img && !Array.isArray(req.files.img)) {
             img = new ImagesManager('brands/');
-            brandDto.img = await img.saveFile(<UploadedFile>req.files.img);
+            brandDto.img = await img.saveFile(req.files.img as UploadedFile);
         }
 
         try {
@@ -26,7 +23,7 @@ class BrandController {
             return res.json(brand);
         } catch (ex) {
             if (img) {
-                img.revert();
+                await img.revert();
             }
             throw ex;
         }
@@ -47,12 +44,11 @@ class BrandController {
     @ErrorHandlerWrap
     async editBrandData(req: Request, res: Response, next: NextFunction) {
         const brandDto = new EditBrandDto(req.body);
-        if(req.files.img)
-        {
-            const brand = await BrandService.editBrand(brandDto, req.files.img);
+        if (req.files && req.files.img && !Array.isArray(req.files.img)) {
+            const brand = await BrandService.editBrand(brandDto, req.files.img as UploadedFile);
             return res.json(brand);
         }
-        
+
         const brand = await BrandService.editBrand(brandDto);
         return res.json(brand);
     }

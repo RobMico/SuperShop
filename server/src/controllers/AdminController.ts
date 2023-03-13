@@ -22,9 +22,9 @@ class AdminController {
     }
 
     @ErrorHandlerWrap
-    async getRedisStoredTypes(req: Request, res: Response, next: NextFunction) {
-        const data = await AdminService.getRedisTypes();
-        return res.json(req.body);
+    async getRedisStorageMap(req: Request, res: Response, next: NextFunction) {
+        const data = await AdminService.getRedisStorageMap();
+        return res.json(data);
     }
 
     @ErrorHandlerWrap

@@ -10,19 +10,24 @@ import redisFilterWorker from "../utils/RedisFilterWorker";
 
 import { Sequelize } from "sequelize-typescript";
 import { Op } from "sequelize";
+import { UploadedFile } from "express-fileupload";
 
 
 class TypeService {
-    async getSuggestions(propName: string) {
+    async getSuggestions(propName: string): Promise<{ textPart: string, count: number }[]> {
         //TODO: rewrite?
-        let result = await DeviceInfoModel.findAll({ where: { title: propName }, group: ['textPart'], 
-        attributes:['textPart', [Sequelize.fn('COUNT', Sequelize.col('textPart')), 'count']] });
-        return result;
+        let result = await DeviceInfoModel.findAll({
+            where: { title: propName }, group: ['textPart'],
+            attributes: ['textPart', [Sequelize.fn('COUNT', Sequelize.col('textPart')), 'count']]
+        });
+        return <any>result;
     }
+
     async getTypeProps(typeId: number) {
         const result = await redisFilterWorker.getFilters(typeId);
         return result;
     }
+
     async addTypeProp(typePropDto: CreateTypePropDto) {
         //function explain
 
@@ -38,7 +43,6 @@ class TypeService {
 
         //TODO: check is such prop exists on other type
         let props = await DeviceInfoModel.findAll({ where: { title: typePropDto.title, textPart: { [Op.in]: typePropDto.values } } });
-
         let keyDevices = {}; //hash map, 'color_red':[10, 399, 2344...]
         for (const e of typePropDto.values) {
             keyDevices[typePropDto.title + "_" + e] = [];
@@ -48,35 +52,42 @@ class TypeService {
         })
 
         for (const key in keyDevices) {
-            console.log(key);
             await redisFilterWorker.addFilter(typePropDto.typeId, key, keyDevices[key])
         }
 
         return keyDevices;
     }
-    async editType(typeDto: EditTypeDto, img?) {
+    async editType(typeDto: EditTypeDto, img?: UploadedFile) {
         const type = await TypesModel.findByPk(typeDto.typeId);
         if (!type) {
             throw ApiError.badRequest('Such type not exists');
         }
 
-        type.set(typeDto);
-
         if (img) {
             const imagesManager = new ImagesManager('types/');
             type.img = await imagesManager.saveFile(img, type.img);
-        }
 
-        await type.save();
+            try {
+                type.set(typeDto);
+                await type.save();
+            } catch (ex) {
+                await imagesManager.revert();
+                throw ex;
+            }
+        }
+        else {
+            type.set(typeDto);
+            await type.save();
+        }
         return type;
     }
+
     async getAllTypes() {
         const types = await TypesModel.findAll();
         return types;
     }
     async createType(typeDto: CreateTypeDto, img?) {
         if (img) {
-            console.log("HERE", img);
             const imgManager = new ImagesManager('types/');
             typeDto.img = await imgManager.saveFile(img);
 

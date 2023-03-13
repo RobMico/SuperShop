@@ -11,11 +11,13 @@ let RedisFiltersView = () => {
     const [_showModal, _setShowModal] = useState(false);
     const { types } = useContext(Context);
     useEffect(() => {
-        getRedisFilters().then(data => {
-            data.data.sort((a, b)=>a[0]>b[0]);
-            _setFilters(data.data);
+        getRedisFilters().then(result => {
+            const data = result.data;
+            console.log('data', data);
+            data.sort((a, b)=>a[0]>b[0]);
+            _setFilters(data);
         });
-        if (types.types && types.types.length == 0) {
+        if (types.types && types.types.length === 0) {
             fetchTypes().then(data => {
                 types.setTypes(data);
             })
@@ -24,9 +26,11 @@ let RedisFiltersView = () => {
 
     }, [])
     const _reload = () => {
-        getRedisFilters().then(data => {
-            data.data.sort((a, b)=>a[0]>b[0]);
-            _setFilters(data.data);
+        getRedisFilters().then(result => {
+            const data = result.data;
+            console.log('data', data);
+            data.sort((a, b)=>a[0]>b[0]);
+            _setFilters(data);
         });
     }
     const _download=()=>{

@@ -1,7 +1,12 @@
+import { NextFunction, Request, Response } from "express";
+import AuthRequest from "../utils/authRequest";
+
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger')(module);
 
-module.exports = (req, res, next)=>{        
+
+
+export default function(req:AuthRequest, res:Response, next:NextFunction){
     try{
         const [method, token] = req.headers.authorization.split(' ');
         if(method!='Bearer'||!token)

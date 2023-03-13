@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import DeviceController from '../controlers/DeviceController';
+import DeviceController from '../controllers/DeviceController';
 import authMiddleware from '../middleware/authMiddleware';
 import optionalAuthMiddleware from '../middleware/optionalAuthMiddleware';
 import checkRole from '../middleware/checkRoleMiddleware';

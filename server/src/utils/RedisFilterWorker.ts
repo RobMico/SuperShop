@@ -1,23 +1,21 @@
 import client from '../redisClient';
-import uuid from 'uuid';
-import redisCacheControl from './redisCacheControl';
+import * as uuid from 'uuid';
 import Logger from './logger';
 const logger = Logger(module);
 import { commandOptions } from 'redis';
-import DeviceInfoModel from '../models/DeviceInfoModel';
 import DeviceInfoDto from '../dto/Device/DeviceInfoDto';
-//import { set } from '../db';
-
-//let client = require('../redisClient');
-//const uuid = require('uuid');
-//const redisCacheControl = require('../utils/redisCacheControl');
-//const logger = require('../utils/logger')(module);
+import RedisCacheController from './RedisCacheController';
+import { GetPropToDeviceKey, GetTypePropsCacheKey, GetTypePropsKey } from './RedisKeyNamesWorker';
 
 interface getIdsResultObject {
     result_key: string;
     ids: number[];
 }
 
+interface getTypeFilters {
+    str: string;
+    count: number;
+}
 
 class FilterWorker {
     async GetAllKeys() {
@@ -37,40 +35,39 @@ class FilterWorker {
     }
 
     async addType(typeId: number) {
-        await client.lPush(('type_' + typeId), []);
-        await client.setBit(('typeD_' + typeId), 0, 0);
+
+        await client.lPush(GetTypePropsKey(typeId), []);
+        await client.setBit(GetPropToDeviceKey(typeId), 0, 0);
     }
 
-    async addFilter(typeId: number, prop: string, device_ids: number[]) {
-        await client.lRange(('type_' + typeId), 0, -1);
-        const typeProps = await client.lRange(('type_' + typeId), 0, -1);
-        if (!typeProps.includes(prop)) {
-            await client.lPush(('type_' + typeId), prop);
+    async addFilter(typeId: number, propKey: string, device_ids: number[]) {
+        const typeProps = await client.lRange(GetTypePropsKey(typeId), 0, -1);
+        if (!typeProps.includes(propKey)) {
+            await client.lPush(GetTypePropsKey(typeId), propKey);
         }
 
         for (const id of device_ids) {
-            await client.setBit(prop, id, 1);
+            await client.setBit(propKey, id, 1);
         }
 
         if (device_ids.length == 0) {
-            await client.setBit(prop, 1, 0);
+            await client.setBit(propKey, 1, 0);
         }
     }
 
-    async editFilter(previous: string, newVal: string, id: number) {
-        previous && await client.setBit(previous, id, 0);
-        newVal && await client.setBit(newVal, id, 1);
+    async editFilter(previousKey: string, newValKey: string, deviceId: number) {
+        previousKey && await client.setBit(previousKey, deviceId, 0);
+        newValKey && await client.setBit(newValKey, deviceId, 1);
         return true;
     }
 
-    async getFilters(typeId: number) {
+    async getFilters(typeId: number): Promise<getTypeFilters[]> {
         //result should be like:
-        //title:'color_red', count:1...
+        //[{title:'color_red', count:1}, {title:'size_big', count:10}, ...]
         //note that color_red can be of different types, so we have to use bitOp(AND) with type bitmap and count ids of certain type
 
-
         //If this data cached, load from cache
-        let cache = <string>await client.get(`*_type${typeId}Props`);//redis get returns buffer only if it is directly set in arguments
+        let cache = <string>await client.get(GetTypePropsCacheKey(typeId));//redis get returns buffer only if it is directly set in arguments
         if (cache) {
             try {
                 logger.info("getFilters;loading cache");
@@ -82,27 +79,25 @@ class FilterWorker {
         }
 
 
-        let stored = <string[]>await client.lRange(('type_' + typeId), 0, -1);//always return string[]
+        let stored = <string[]>await client.lRange(GetTypePropsKey(typeId), 0, -1);//always return string[]
         let result = [];
         for (const e of stored) {
             if (e) {//sometimes there are empty lines
-                try {
-                    let uniqueKey = "*_" + uuid.v4();
-                    await client.bitOp('AND', uniqueKey, [('typeD_' + typeId), e]);
-                    const count: number = await client.bitCount(uniqueKey);
-                    result.push({ str: e, count: count })
-                } catch { }
+                let uniqueKey = "*_" + uuid.v4();
+                await client.bitOp('AND', uniqueKey, [GetPropToDeviceKey(typeId), e]);
+                const count: number = await client.bitCount(uniqueKey);
+                result.push({ str: e, count: count })
             }
         }
-        await client.set(`*_type${typeId}Props`, JSON.stringify(result));//cashing
+        await client.set(GetTypePropsCacheKey(typeId), JSON.stringify(result));//cashing result
         return result;
     }
 
     async addDevice(props: DeviceInfoDto[], deviceId: number, typeId: number) {
         //get all filters on this type
-        let storedFilters = await client.lRange(('type_' + typeId), 0, -1);
+        let storedFilters = await client.lRange(GetTypePropsKey(typeId), 0, -1);
         //set device on type list
-        await client.setBit(('typeD_' + typeId), deviceId, 1);
+        await client.setBit(GetPropToDeviceKey(typeId), deviceId, 1);
         for (const prop of props) {
             let filter = prop.title + '_' + prop.textPart;
             if (storedFilters.includes(filter)) {
@@ -148,7 +143,7 @@ class FilterWorker {
         }
 
         if (typeId) {//apply typeId filter if require
-            concated.push('typeD_' + typeId);
+            concated.push(GetPropToDeviceKey(typeId));
         }
 
         //["color_blue,color_red" AND "RAM_16" AND "" AND ...] => Bitmap
@@ -165,8 +160,14 @@ class FilterWorker {
         let ids = this.GetBits(resultBitmap);
         return { result_key, ids };
     }
-    
-    async getRedisTypes() {
+
+    async getRedisStorageMap() {
+        //All types and their props for recreating
+        //format:
+        // [
+        //     [typeId, prop1, prop2, prop3, ....]
+        //     [ (typeId)'1', 'color_green', 'color_blue', 'color_red' ],
+        // ]
         let types: string[] = await client.keys('type_*');
         let res: string[][] = [];
         for (const type of types) {

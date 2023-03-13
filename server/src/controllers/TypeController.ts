@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { UploadedFile } from "express-fileupload";
 import CreateTypeDto from "../dto/Type/CreateTypeDto";
 import CreateTypePropDto from "../dto/Type/CreateTypePropDto";
 import EditTypeDto from "../dto/Type/EditTypeDto";
@@ -10,8 +11,8 @@ class TypeController {
     @ErrorHandlerWrap
     async createType(req: Request, res: Response, next: NextFunction) {
         const typeDto = new CreateTypeDto(req.body);
-        if (req.files && req.files.img) {
-            const type = await TypeService.createType(typeDto, req.files.img);
+        if (req.files && req.files.img&&!Array.isArray(req.files.img)) {
+            const type = await TypeService.createType(typeDto, req.files.img as UploadedFile);
             return res.json(type);
         }
         else {
@@ -28,8 +29,8 @@ class TypeController {
     @ErrorHandlerWrap
     async editType(req: Request, res: Response, next: NextFunction) {
         const typeDto = new EditTypeDto(req.body);
-        if (req.files && req.files.img) {
-            const type = await TypeService.editType(typeDto, req.files.img);
+        if (req.files && req.files.img && !Array.isArray(req.files.img)) {
+            const type = await TypeService.editType(typeDto, req.files.img as UploadedFile);
             return res.json(type);
         }
         else{
@@ -46,7 +47,7 @@ class TypeController {
     //TODO:remove type prop
     @ErrorHandlerWrap
     async getTypeProps(req: Request, res: Response, next: NextFunction) {
-        const typeId = Validator.ValidatePositiveNumber(req.body.typeId, 'typeId');
+        const typeId = Validator.ValidatePositiveNumber(req.query.typeId, 'typeId');
         const props = await TypeService.getTypeProps(typeId);
         return res.json(props);
     }

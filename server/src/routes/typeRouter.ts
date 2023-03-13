@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import typeController from '../controlers/TypeController';
+import typeController from '../controllers/TypeController';
 import checkRole from '../middleware/checkRoleMiddleware';
 
 router.post('/edit', checkRole('ADMIN'), typeController.editType);

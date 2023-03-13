@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import authController from '../controlers/AuthController';
+import authController from '../controllers/AuthController';
 import ApiError from '../error/ApiError';
 import authMiddleware from '../middleware/authMiddleware';
 import ErrorHandlerWrap from '../middleware/errorHandlerWrap';
