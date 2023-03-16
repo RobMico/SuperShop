@@ -3,6 +3,7 @@ import jwt_decode from 'jwt-decode';
 
 
 export const createDevice = async (Data)=>{
+    console.log("HELLO")
     const {data} = await authHost.post('api/device',Data);
     return data;
 }

@@ -141,6 +141,13 @@ const CreateDevice = ({ show, onHide }) => {
         formData.append('info', JSON.stringify(info.concat(_suggestProps.map(e => { return { title: e.name, textPart: e.textPart } }))))        
         createDevice(formData).then(data => { //onHide() });            
             onHide()
+        }).catch(err=>{
+            if(err.response&&err.response.data&&err.response.data.message)
+            {
+                alert(err.response.data.message)
+            }
+            
+            console.error(err);
         });
     }
 
@@ -174,7 +181,7 @@ const CreateDevice = ({ show, onHide }) => {
                 <Row className="mt-2">
                     <Col md={1}><Form.Label>Name:</Form.Label></Col>
                     <Col><Form.Control placeholder="Enter device name" value={name} onChange={e => { setName(e.target.value); setNameValid(true) }} /></Col>
-                    {nameValid ? '' : <div>Incorrect name</div>}
+                    {nameValid ? '' : <div style={{color:'red'}}>Incorrect name</div>}
                 </Row>
                 <Dropdown className="mt-2 mb-2">
                     <Dropdown.Toggle>{types.selectedType.name || 'Select type'}</Dropdown.Toggle>
@@ -188,7 +195,7 @@ const CreateDevice = ({ show, onHide }) => {
                         )}
                     </Dropdown.Menu>
                 </Dropdown>
-                {typeValid ? '' : <div>Type not chosen</div>}
+                {typeValid ? '' : <div style={{color:'red'}}>Type not chosen</div>}
                 <Dropdown className="mt-2 mb-2">
                     <Dropdown.Toggle>{brands.selectedBrand.name || 'Select brand'}</Dropdown.Toggle>
                     <Dropdown.Menu>
@@ -201,20 +208,20 @@ const CreateDevice = ({ show, onHide }) => {
                         )}
                     </Dropdown.Menu>
                 </Dropdown>
-                {brandValid ? '' : <div>Brand not chosen</div>}
+                {brandValid ? '' : <div style={{color:'red'}}>Brand not chosen</div>}
                 <Row className="mt-2">
                     <Col md={1}><Form.Label>Price:</Form.Label></Col>
                     <Col><Form.Control placeholder="Enter device price" type="Number" value={price} onChange={e => { setPrice((e.target.value)); setPriceValid(true) }} /></Col>
                 </Row>
-                {priceValid ? '' : <div>Incorrect price</div>}
+                {priceValid ? '' : <div style={{color:'red'}}>Incorrect price</div>}
                 <Form.Control className="mt-2" type="file" multiple onChange={selectFile} />
-                {imagesValid ? '' : <div>Upload 3 to 8 images</div>}
+                {imagesValid ? '' : <div style={{color:'red'}}>Upload 3 to 8 images</div>}
                 <Button variant="outline-dark" className="mt-2 mb-2" onClick={addInfo}>Add new property</Button>
                 {_suggestProps ? _suggestProps.map((el) =>
                     <InputGroup className="mb-3" key={el.name}>
                         <Form.Label >{el.name}:</Form.Label>
                         <Form.Control aria-label="Text input with dropdown button" value={el.textPart} onChange={e => _changeSuggestInfo('textPart', e.target.value, el)} />
-                        {el.valueValid == false ? <div>Incorrect value</div> : ''}
+                        {el.valueValid == false ? <div style={{color:'red'}}>Incorrect value</div> : ''}
                         <DropdownButton
                             variant="outline-secondary"
                             title="Suggest"
@@ -232,11 +239,11 @@ const CreateDevice = ({ show, onHide }) => {
                 {info.map(i => <Row className="mt-4" key={i.number}>
                     <Col md={5}>
                         <Form.Control placeholder="Name of property" value={i.title} onChange={e => { changeInfo('title', e.target.value, i.number) }} />
-                        {i.titleValid == false ? <div>Incorrect title</div> : ''}
+                        {i.titleValid == false ? <div style={{color:'red'}}>Incorrect title</div> : ''}
                     </Col>
                     <Col md={5}>
                         <Form.Control placeholder="Value of property" value={i.textPart} onChange={e => { changeInfo('textPart', e.target.value, i.number) }} />
-                        {i.valueValid == false ? <div>Incorrect value</div> : ''}
+                        {i.valueValid == false ? <div style={{color:'red'}}>Incorrect value</div> : ''}
                     </Col>
                     <Col md={1}>
                         <Button variant="outline-danger" onClick={() => removeInfo(i.number)}>Delete</Button>
