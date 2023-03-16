@@ -26,7 +26,10 @@ class DeviceController {
 
     @ErrorHandlerWrap
     async getAll(req: Request, res: Response, next: NextFunction) {
+        console.log(req.query)
+        console.log(req.body)
         const getDevicesDto = new GetAllDevicesDto(req.query);
+        console.log("H1", getDevicesDto);
         const result = await DeviceService.getAll(getDevicesDto);
         return res.json(result);
     }
@@ -59,7 +62,7 @@ class DeviceController {
 
     @ErrorHandlerWrap
     async getDisabled(req: Request, res: Response, next: NextFunction) {
-        const selector = new SelectorDto(req.body);
+        const selector = new SelectorDto(req.query);
         const devices = await DeviceService.getDisabled(selector);
         return res.json(devices);
     }

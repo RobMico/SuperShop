@@ -8,15 +8,17 @@ class CreateDeviceDto {
     price: number;
     brandId: number;
     typeId: number;
-    disabled: boolean;
+    disabled: boolean = false;
     info: DeviceInfoDto[];
     img?: string;
     constructor(body: any) {
-        this.name = Validator.ValidateBrandTypeName(body.name);
-        this.price = Validator.ValidatePositiveNumber(body.price);
-        this.brandId = Validator.ValidatePositiveNumber(body.brandId);
-        this.typeId = Validator.ValidatePositiveNumber(body.typeId);
-        this.disabled = Validator.ValidateBoolean(body.disabled);
+        this.name = Validator.ValidateBrandTypeName(body.name, 'name');
+        this.price = Validator.ValidatePositiveNumber(body.price, 'price');
+        this.brandId = Validator.ValidatePositiveNumber(body.brandId, 'brandId');
+        this.typeId = Validator.ValidatePositiveNumber(body.typeId, 'typeId');
+        if (this.disabled) {
+            this.disabled = Validator.ValidateBoolean(body.disabled, 'disabled');
+        }
         this.info = Validator.ValidateDeviceInfo(body.info);
     }
 }

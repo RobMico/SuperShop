@@ -5,8 +5,7 @@ import TokenUserData from '../dto/TokenUserDataDto';
 import BasketService from '../services/BasketService';
 import ErrorHandlerWrap from '../middleware/errorHandlerWrap';
 import Validator from '../utils/Validator';
-import Logger from '../utils/logger';
-const logger = Logger(module);
+import logger from '../utils/logger';
 
 class BasketController {
     @ErrorHandlerWrap

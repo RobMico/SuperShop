@@ -9,6 +9,9 @@ import Cryptor from "../utils/Crypror";
 class AuthService {
     async recreateToken(userDto: TokenUserData): Promise<string> {
         const user = await UserModel.findOne({ where: { id: userDto.id } });
+        if(!user){
+            throw ApiError.badRequest('such user not exists');
+        }
         const token = await Cryptor.generateToken(user);
         return token;
     }

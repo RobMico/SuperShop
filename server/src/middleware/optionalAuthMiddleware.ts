@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import AuthRequest from "../utils/authRequest";
 import jwt from 'jsonwebtoken';
+import logger from "../utils/logger";
 
 export default function (req: AuthRequest, res: Response, next: NextFunction) {
     try {
@@ -15,6 +16,7 @@ export default function (req: AuthRequest, res: Response, next: NextFunction) {
         req.user = decoded;
         return next();
     } catch (ex) {
+        logger.warn('Auth failde', ex);
         return next();
     }
 }

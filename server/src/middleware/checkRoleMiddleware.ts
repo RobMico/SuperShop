@@ -1,8 +1,10 @@
-const jwt = require('jsonwebtoken');
-const logger = require('../utils/logger')(module);
+import { NextFunction, Request, Response } from 'express';
+import * as jwt from 'jsonwebtoken';
+import AuthRequest from '../utils/authRequest';
+import logger from '../utils/logger';
 
-module.exports = function(role){ 
-    return (req, res, next)=>{
+export default function(role:string){ 
+    return (req:AuthRequest, res:Response, next:NextFunction)=>{
         
         try{
             const [method, token] = req.headers.authorization.split(' ');

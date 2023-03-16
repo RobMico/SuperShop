@@ -12,11 +12,6 @@ import loggerMiddlerware from './src/middleware/ipLogger';
 import FileUpload from 'express-fileupload';
 import logger from './src/utils/logger';
 
-
-
-//import 'express-async-errors';
-
-let Logger = logger(module);
 const PORT: number = parseInt(process.env.PORT) || 5000;
 const app: Express = express();
 
@@ -24,7 +19,6 @@ app.use(cors({ credentials: true }));
 app.use(express.json());
 app.use(FileUpload());
 app.use(express.static(process.env.static));
-
 
 app.use(loggerMiddlerware);
 app.use('/api', router);
@@ -34,9 +28,9 @@ const start = async () => {
         await sequelize.authenticate();
         await sequelize.sync();
         await redis.connect();
-        const server = app.listen(PORT, () => { Logger.debug(`Listening on ${PORT}`); });
+        const server = app.listen(PORT, () => { logger.debug(`Listening on ${PORT}`); });
     } catch (ex) {
-        Logger.error("Can not start appclication", ex)
+        logger.error("Can not start appclication", ex)
     }
 }
 

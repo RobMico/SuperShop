@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import AuthRequest from "../utils/authRequest";
-
-const jwt = require('jsonwebtoken');
-const logger = require('../utils/logger')(module);
+import logger from '../utils/logger';
+import * as jwt from 'jsonwebtoken'
 
 
 

@@ -41,7 +41,7 @@ export default class DeviceModel extends Model<DeviceModel, DeviceCreationAttrib
     })
     price: number;
 
-    @Column({ type: DataTypes.STRING, allowNull: false })
+    @Column({ type: DataTypes.TEXT, allowNull: false })
     img: string;
 
     @Column({ type: DataTypes.DECIMAL, allowNull: false, defaultValue: 0 })

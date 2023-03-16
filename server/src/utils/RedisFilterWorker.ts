@@ -1,7 +1,6 @@
 import client from '../redisClient';
 import * as uuid from 'uuid';
-import Logger from './logger';
-const logger = Logger(module);
+import logger from './logger';
 import { commandOptions } from 'redis';
 import DeviceInfoDto from '../dto/Device/DeviceInfoDto';
 import RedisCacheController from './RedisCacheController';
@@ -19,6 +18,7 @@ interface getTypeFilters {
 
 class FilterWorker {
     async GetAllKeys() {
+        logger.info('');
         let data = await client.keys('*');
         return data;
     }
@@ -35,12 +35,13 @@ class FilterWorker {
     }
 
     async addType(typeId: number) {
-
+        logger.info('add type', typeId);
         await client.lPush(GetTypePropsKey(typeId), []);
         await client.setBit(GetPropToDeviceKey(typeId), 0, 0);
     }
 
     async addFilter(typeId: number, propKey: string, device_ids: number[]) {
+        logger.info('addFilter', [typeId, propKey]);
         const typeProps = await client.lRange(GetTypePropsKey(typeId), 0, -1);
         if (!typeProps.includes(propKey)) {
             await client.lPush(GetTypePropsKey(typeId), propKey);
@@ -56,45 +57,55 @@ class FilterWorker {
     }
 
     async editFilter(previousKey: string, newValKey: string, deviceId: number) {
+        logger.info('addFilter', [previousKey, newValKey, deviceId]);
         previousKey && await client.setBit(previousKey, deviceId, 0);
         newValKey && await client.setBit(newValKey, deviceId, 1);
         return true;
     }
 
-    async getFilters(typeId: number): Promise<getTypeFilters[]> {
+    async getFilters(typeId: number, count: boolean = true): Promise<getTypeFilters[] | string[]> {
         //result should be like:
         //[{title:'color_red', count:1}, {title:'size_big', count:10}, ...]
         //note that color_red can be of different types, so we have to use bitOp(AND) with type bitmap and count ids of certain type
 
         //If this data cached, load from cache
-        let cache = <string>await client.get(GetTypePropsCacheKey(typeId));//redis get returns buffer only if it is directly set in arguments
-        if (cache) {
-            try {
-                logger.info("getFilters;loading cache");
-                return JSON.parse(cache);
+        if (count) {
+            let cache = <string>await client.get(GetTypePropsCacheKey(typeId));//redis get returns buffer only if it is directly set in arguments
+            if (cache) {
+                try {
+                    logger.info('addFilter, cahce', [typeId]);
+                    return JSON.parse(cache);
+                }
+                catch (ex) {
+                    logger.error("getFilters, cahce parse error", ex);
+                }
             }
-            catch (ex) {
-                logger.error("getFilters;Loading cache error", ex);
-            }
-        }
 
 
-        let stored = <string[]>await client.lRange(GetTypePropsKey(typeId), 0, -1);//always return string[]
-        let result = [];
-        for (const e of stored) {
-            if (e) {//sometimes there are empty lines
-                let uniqueKey = "*_" + uuid.v4();
-                await client.bitOp('AND', uniqueKey, [GetPropToDeviceKey(typeId), e]);
-                const count: number = await client.bitCount(uniqueKey);
-                result.push({ str: e, count: count })
+            let stored = <string[]>await client.lRange(GetTypePropsKey(typeId), 0, -1);//always return string[]
+            let result = [];
+            for (const e of stored) {
+                if (e) {//sometimes there are empty lines
+                    let uniqueKey = "*_" + uuid.v4();
+                    await client.bitOp('AND', uniqueKey, [GetPropToDeviceKey(typeId), e]);
+                    const count: number = await client.bitCount(uniqueKey);
+                    RedisCacheController.addTempKey(uniqueKey);
+                    result.push({ str: e, count: count })
+                }
             }
+            logger.info('addFilter, recreate cache', [typeId]);
+            await client.set(GetTypePropsCacheKey(typeId), JSON.stringify(result));//cashing result
+            return result;
         }
-        await client.set(GetTypePropsCacheKey(typeId), JSON.stringify(result));//cashing result
-        return result;
+        else {
+            const typeProps = <string[]>await client.lRange(GetTypePropsKey(typeId), 0, -1);
+            return typeProps;
+        }
     }
 
     async addDevice(props: DeviceInfoDto[], deviceId: number, typeId: number) {
         //get all filters on this type
+        logger.info('', [deviceId]);
         let storedFilters = await client.lRange(GetTypePropsKey(typeId), 0, -1);
         //set device on type list
         await client.setBit(GetPropToDeviceKey(typeId), deviceId, 1);
@@ -128,16 +139,17 @@ class FilterWorker {
                 concated[i] = filters[i].toString();
             }
             else {
-                let ORKeyName = "*_" + filters[i]
+                let ORKeyName = "*_" + filters[i];
                 concated[i] = ORKeyName;
                 //check cache                
-                let isStored = await client.exists(ORKeyName)
+                let isStored = await client.exists(ORKeyName);
                 if (isStored) {
                     //logger.info("getIds;loading from cache filters");
                     continue;
                 }
                 else {//if no cache
-                    await client.bitOp('OR', ORKeyName, filters[i])
+                    await client.bitOp('OR', ORKeyName, filters[i]);
+                    RedisCacheController.addCacheKey(ORKeyName);
                 }
             }
         }
@@ -151,7 +163,7 @@ class FilterWorker {
         await client.bitOp('AND', result_key, concated);//executing AND op for concated
 
         let resultBitmap = await client.get(commandOptions({ returnBuffers: true }), result_key)
-
+        RedisCacheController.addTempKey(result_key);
 
         if (!resultBitmap) {
             return null;
@@ -168,6 +180,8 @@ class FilterWorker {
         //     [typeId, prop1, prop2, prop3, ....]
         //     [ (typeId)'1', 'color_green', 'color_blue', 'color_red' ],
         // ]
+
+        logger.warn('Get redis map');
         let types: string[] = await client.keys('type_*');
         let res: string[][] = [];
         for (const type of types) {
@@ -177,26 +191,28 @@ class FilterWorker {
         return res;
     }
 
-
-    async regenerateStorageStructure(map: any[]) {
+    async regenerateStorageStructure(map: string[][]) {
+        logger.warn('Regenerating redist structure', [map]);
         let resultSet = new Set();
         await client.sendCommand(['FLUSHALL']);//Clear redis
-        for (const e of map) {
-
-            for (let i = 0; i < e.length; i++) {
+        for (const typeArr of map) {
+            for (let i = 0; i < typeArr.length; i++) {
                 if (i == 0) {
-                    await client.lPush('type_' + e[i], e.slice(1, e.length));
-                    await client.setBit('typeD_' + e[i], 0, 0);
+                    await client.lPush('type_' + typeArr[0], typeArr.slice(1, typeArr.length));
+                    await client.setBit('typeD_' + typeArr[0], 0, 0);
                 }
                 else {
-                    resultSet.add(e[i]);
-                    await client.setBit(e[i], 0, 0)
+                    resultSet.add(typeArr[i]);
+                    await client.setBit(typeArr[i], 0, 0)
                 }
             }
         }
         return Array.from(resultSet);
     }
+
+
     async regenerateStorageContent({ map, device_props, device_types }) {
+        logger.warn('regenerate storage content', [map, device_props, device_types]);
         if (device_props) {
             for (const { dataValues } of device_props) {
                 if (map.includes(dataValues.val)) {

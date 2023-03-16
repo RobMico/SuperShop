@@ -3,13 +3,15 @@ import * as fs from 'fs';
 import path from 'path';
 import * as uuid from 'uuid';
 import { UploadedFile } from "express-fileupload";
+import logger from "./logger";
 
 class ImagesManager {
     static removeFile(fileName: string, filePath: string) {
+        logger.info('remove file', [fileName, filePath]);
         fileName = fileName.replace('%0:', '');
         fs.unlink(path.join(process.env.static, filePath, fileName), (err) => {
             if (err) {
-                //TODO: logging
+                logger.error('remove error', [err]);
             }
         });
     }
@@ -29,6 +31,7 @@ class ImagesManager {
     }
 
     async saveFiles(files: UploadedFile[]) {
+        logger.info('save files');
         //needed to run promise all
         let writeAll = [];
         //If only one image is sent, here i get an object instead of an array(a single image is not good at all)
@@ -60,6 +63,7 @@ class ImagesManager {
         return this.result;
     }
     async saveFile(file: UploadedFile, name?: string) {
+        logger.info('save file')
         if (name === 'noimage.jpg') {
             name = null;
         }
@@ -100,7 +104,7 @@ class ImagesManager {
             this.result.replace(new RegExp('%0:', 'g'), '').split(';').forEach(fileName => {
                 fs.unlink(path.join(process.env.static, this.filePath, fileName), (err: Error) => {
                     if (err) {
-                        //TODO: logging
+                        logger.error('revert error', [err]);
                     }
                 });
             });

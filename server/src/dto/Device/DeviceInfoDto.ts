@@ -9,6 +9,7 @@ export default class DeviceInfoDto {
     deviceId: number;
     id: number;
     remove: boolean;
+    edit?:string;
     constructor(obj: any) {
         this.title = Validator.ValidateBrandTypeName(obj.title);
         this.textPart = Validator.ValidateBrandTypeName(obj.textPart);

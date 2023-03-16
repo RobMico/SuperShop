@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import ApiError from "../../error/ApiError";
 import Validator from "../../utils/Validator";
 import SelectorDto from "../SelectorDto";
 
@@ -19,6 +20,14 @@ class GetAllDevicesDto extends SelectorDto {
         if (body.typeId) {
             this.typeId = Validator.ValidatePositiveNumber(body.typeId);
             if (body.filters) {
+                if (typeof body.filters === 'string') {
+                    try {
+                        body.filters = JSON.parse(body.filters);
+                    } catch {
+                        throw ApiError.validationError('body.filters parsing error')
+                    }
+                }
+
                 this.nameIncludes = Validator.ValidateString(body.filters.nameSubstr);
                 this.minPrice = Validator.ValidatePositiveNumber(body.filters.minPrice);
                 this.maxPrice = Validator.ValidatePositiveNumber(body.filters.maxPrice);
@@ -34,6 +43,8 @@ class GetAllDevicesDto extends SelectorDto {
                         this.sortBy = 'price';
                     }
                 }
+
+
                 this.dynamic = Validator.ValidateDynamicDevicesFilters(body.filters.dynamic);
                 if (body.filters.sortOrder !== undefined) {
                     this.sortOrder = Validator.ValidateBoolean(body.filters.sortOrder, 'sortOrder');

@@ -34,16 +34,13 @@ class DeviceService {
 
 
 
-            let result = await DeviceModel.update(
+            await DeviceModel.update(
                 {
                     'rate': db.literal(`(rate*ratecount+${rating.rate})/(ratecount+1)`),
                     'ratecount': db.literal('ratecount+1')
                 },
                 { where: { id: createRate.deviceId }, transaction: t }
             );
-
-
-
             return rating;
         });
     }
@@ -70,6 +67,8 @@ class DeviceService {
         const devices = await DeviceModel.findAndCountAll({ where: { disabled: true }, limit: selector.limit, offset: selector.offset });
         return devices;
     }
+
+
     async editDevice(editDeviceDto: EditDeviceDto) {
         const device = await DeviceModel.findOne({
             where: { id: editDeviceDto.deviceId },
@@ -79,23 +78,27 @@ class DeviceService {
             throw ApiError.badRequest('No such device');
         }
         const result = await db.transaction(async (t) => {
+            const typeProps = <string[]>await RedisFilterWorker.getFilters(device.typeId, false);
+
             device.name = editDeviceDto.name;
             device.price = editDeviceDto.price;
             device.brandId = editDeviceDto.brandId;
 
-            device.typeId = editDeviceDto.typeId;//TODO
+            //device.typeId = editDeviceDto.typeId;//TODO
 
             const promisesArr = [];
 
+            //Save device info to db
             for (const prop of editDeviceDto.info) {
                 let prototype = device.info.find(el => el.id == prop.id);
                 if (prototype) {//if this property already exists on this device we can remove or edit it
                     if (prop.remove) {//if this prop is marked 'remove'
-                        promisesArr.push(prototype.destroy({ transaction: t }))
+                        promisesArr.push(prototype.destroy({ transaction: t }));
                     }
                     else {//if it's not marked as "remove", edit
                         prototype.textPart = prop.textPart;
                         prototype.numPart = prop.numPart;
+                        prop.edit = prop.title + '_' + prop.textPart;
                         promisesArr.push(prototype.save({ transaction: t }));
                     }
                 }
@@ -108,6 +111,25 @@ class DeviceService {
 
             promisesArr.push(device.save());
             await Promise.all(promisesArr);
+
+            //save device info to redis
+            for (const prop of editDeviceDto.info) {
+                const key = prop.title + '_' + prop.textPart;
+                if (typeProps.includes(key)) {
+                    if (prop.remove) {
+                        await RedisFilterWorker.editFilter(key, null, device.id);
+                    }
+                    else {
+                        if (prop.edit && typeProps.includes(prop.edit)) {
+                            await RedisFilterWorker.editFilter(prop.edit, key, device.id);
+                        }
+                        else{
+                            await RedisFilterWorker.editFilter(null, key, device.id);
+                        }
+                    }
+                }
+            }
+
             return device;
         });
     }
@@ -202,7 +224,6 @@ class DeviceService {
                         await DeviceInfoModel.bulkCreate(insertArr, { transaction: t });
                         await RedisFilterWorker.addDevice(deviceDto.info, device.id, device.typeId);
                     }
-
                     return device;
                 });
             } catch (ex) {
